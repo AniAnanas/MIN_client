@@ -3,76 +3,81 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Client.Front" xmlns:vm="clr-namespace:Client.Front.ViewModels"
+        xmlns:local="clr-namespace:Client.Front"
+        xmlns:vm="clr-namespace:Client.Front.ViewModels"
+        xmlns:Controls="clr-namespace:Client.Front.Controls"
         mc:Ignorable="d"
-        Title="MainWindow" Width="1100" Height="720"
-        Icon="/content/icon1.png">
+        Title="MainWindow"
+        d:Width="1920" 
+        d:Height="1080"
+        Icon="/content/icon1.png"
+        Background="#FF1F1F1F" WindowStyle="None">
 
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
-
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="280"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto" MinWidth="280"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="32"/>
-            <!-- Topbar -->
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="64"/>
-            <!-- Bottom input -->
+            <!--<RowDefinition Height="30"/>-->
         </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280"/>
-            <!-- Left chats -->
-            <ColumnDefinition Width="*"/>
-            <!-- Center -->
-            <ColumnDefinition Width="300"/>
-            <!-- Right profile -->
-        </Grid.ColumnDefinitions>
+        <Controls:TopBar x:Name="topBar"
+             Grid.Row="0" 
+             Grid.Column="0" 
+             Grid.ColumnSpan="3" 
+             MinimizeClicked="TopBar_MinimizeClicked"
+             MaximizeClicked="TopBar_MaximizeClicked"
+             CloseClicked="TopBar_CloseClicked"/>
 
-        <!--Topbar-->
-        <Border Grid.ColumnSpan="3" Background="{StaticResource PanelBrush}" Padding="6">
-            <DockPanel LastChildFill="True">
-                <!--Icon + название мб (переделать потом в кнопку прост для главного меню)-->
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
-                    <Ellipse Width="20" Height="20" Fill="{StaticResource AccentBrush}"/>
-                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding AppTitle}"/>
-                </StackPanel>
-                
-                <!--Вкладки-->
-                <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto"
-                    DockPanel.Dock="Top" Margin="8 0">
-                    <ItemsControl ItemsSource="{Binding OpenChats}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type sys:String}" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                                <Border Background="{StaticResource PanelBrush}" CornerRadius="0 8 0 0" 
-                                        Margin="4" Padding="8" Cursor="Hand" 
-            BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.SelectedChat, Converter={x:Null}}">
-                                    <TextBlock Text="{Binding}" Foreground="White"/>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+        <Border Name="LeftBorder"
+             Grid.Column="0"
+             Grid.Row="1"
+             Background="Transparent"
+             BorderBrush="#4C000000"
+             BorderThickness="2"
+             CornerRadius="15"
+             Margin="7">
 
-                <!-- Right: controls -->
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
-                    <Button Style="{StaticResource TopBarButton}" Command="{Binding NewChatCommand}" ToolTip="New Chat">
-                        <TextBlock Text="✚" FontSize="14"/>
-                    </Button>
-                    <Button Style="{StaticResource TopBarButton}" Command="{Binding SearchCommand}" ToolTip="Search">
-                        <TextBlock Text="🔍" FontSize="14"/>
-                    </Button>
-                    <Button Style="{StaticResource TopBarButton}" Command="{Binding SettingsCommand}" ToolTip="Settings">
-                        <TextBlock Text="☰" FontSize="14"/>
-                    </Button>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Name="ChatStackPanel" Grid.Row="0">
+                    <Controls:ChatTab/>
                 </StackPanel>
-            </DockPanel>
+
+                <Controls:AddButtons Grid.Row="1" Clicked="AddPerson_Clicked" />
+            </Grid>
+
+        </Border>
+
+        <Border x:Name="CenterBorder"
+            Grid.Column="1"
+            Grid.Row="1"
+            Background="Transparent"
+            BorderBrush="#4C000000"
+            BorderThickness="2"
+            CornerRadius="15"
+            Margin="0,7">
+        </Border>
+
+        <Border x:Name="RightBorder"
+        Grid.Column="2"
+        Grid.Row="1"
+        Background="Transparent"
+        BorderBrush="#4C000000"
+        BorderThickness="2"
+        CornerRadius="15"
+        Margin="7">
         </Border>
     </Grid>
 </Window>

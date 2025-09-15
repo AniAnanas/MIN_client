@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Client.Front.Controls;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,6 +37,50 @@ namespace Client.Front
         {
             
 
+        }
+        private void TopBar_MinimizeClicked(object sender, EventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void TopBar_MaximizeClicked(object sender, EventArgs e)
+        {
+            ToggleMaximize();
+        }
+
+        private void TopBar_CloseClicked(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void AddPerson_Clicked(object sendler, EventArgs e)
+        {
+            AddChat();
+        }
+        private void ToggleMaximize()
+        {
+            if (WindowState == WindowState.Maximized)
+            {
+                WindowState = WindowState.Normal;
+                if (topBar.FindName("MaximizeBtn") is Button maximizeBtn)
+                {
+                    maximizeBtn.Content = "□";
+                }
+            }
+            else
+            {
+                WindowState = WindowState.Maximized;
+                if (topBar.FindName("MaximizeBtn") is Button maximizeBtn)
+                {
+                    maximizeBtn.Content = "❐";
+                }
+            }
+        }
+
+        private void AddChat()
+        {
+            ChatTab newChat = new ChatTab();
+            ChatStackPanel.Children.Add(newChat);
         }
     }
 }

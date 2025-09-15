@@ -9,11 +9,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Content\AddButons\ButtonAddChanel.png" />
+    <None Remove="Content\AddButons\ButtonAddGroup.png" />
+    <None Remove="Content\AddButons\ButtonAddPerson.png" />
+    <None Remove="Content\Avatar.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="content\icon1.png" />
+    <Resource Include="Content\AddButons\ButtonAddChanel.png" />
+    <Resource Include="Content\AddButons\ButtonAddGroup.png" />
+    <Resource Include="Content\AddButons\ButtonAddPerson.png" />
+    <Resource Include="Content\Avatar.png" />
+    <Resource Include="Content\icon1.png" />
   </ItemGroup>
 
 </Project>
