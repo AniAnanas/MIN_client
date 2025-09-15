@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,9 +17,25 @@ namespace Client.Front
     /// </summary>
     public partial class MainWindow : Window
     {
+        public Config? config;
+        public string timeBoot;
+        public string currentDir;
+        public static MainWindow? Instance;
         public MainWindow()
         {
             InitializeComponent();
+            
+            Instance = this;
+            currentDir = Directory.GetCurrentDirectory();
+            timeBoot = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
+            config = Config.Read();
+            Initialized += OnPostInitialize;
+            Log.Info("MainWindow Initialized!");
+        }
+        public void OnPostInitialize(object? sender, EventArgs e)
+        {
+            
+
         }
     }
 }

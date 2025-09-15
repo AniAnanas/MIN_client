@@ -2,7 +2,7 @@
 
 namespace Client.Front.Models
 {
-    public class Chat
+    public class ChatTab
     {
         public string Title { get; set; }
         public string LastPreview { get; set; }

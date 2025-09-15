@@ -9,10 +9,10 @@ namespace Client.Front.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<Chat> Chats { get; } = new();
+        public ObservableCollection<ChatTab> Chats { get; } = new();
         public ObservableCollection<string> OpenChats { get; } = new();
-        private Chat? _selectedChat;
-        public Chat? SelectedChat
+        private ChatTab? _selectedChat;
+        public ChatTab? SelectedChat
         {
             get { return _selectedChat; }
             set { _selectedChat = value; OnPropertyChanged(); }
@@ -35,7 +35,7 @@ namespace Client.Front.ViewModels
             for (int i = 0; i <= 8; i++)
             {
                 string s = i.ToString();
-                Chats.Add(new Chat
+                Chats.Add(new ChatTab
                 {
                     Title = "Чюпеп " + s,
                     LastPreview = "Последнее сообщение " + s,
@@ -71,7 +71,7 @@ namespace Client.Front.ViewModels
         }
         private void CreateChat()
         {
-            var c = new Chat { Title = "New Chat", LastPreview = "", Status = "offline" };
+            var c = new ChatTab { Title = "New Chat", LastPreview = "", Status = "offline" };
             Chats.Add(c);
             SelectedChat = c;
         }
