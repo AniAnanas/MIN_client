@@ -20,6 +20,12 @@ namespace Client.Front.Controls
     /// </summary>
     public partial class ChatTab : UserControl
     {
+        public string Title = "Example";
+        public string LastPreview = "Example Preview";
+        public string Time = "12:00";
+        public int Unread = 0;
+        public bool showUnreadMark => Unread > 0;
+
         public ChatTab()
         {
             InitializeComponent();

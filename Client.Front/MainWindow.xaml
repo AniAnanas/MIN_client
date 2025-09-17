@@ -53,6 +53,24 @@
 
                 <StackPanel Name="ChatStackPanel" Grid.Row="0">
                     <Controls:ChatTab/>
+                    <ListBox ItemsSource="{Binding Chats}" SelectedItem="{Binding SelectedChat}" 
+                        BorderThickness="0" Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="4" Cursor="Hand">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Width="36" Height="36" Fill="{StaticResource AccentBrush}" Grid.Column="0"/>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding LastPreview}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </StackPanel>
 
                 <Controls:AddButtons Grid.Row="1" Clicked="AddPerson_Clicked" />
@@ -71,13 +89,13 @@
         </Border>
 
         <Border x:Name="RightBorder"
-        Grid.Column="2"
-        Grid.Row="1"
-        Background="Transparent"
-        BorderBrush="#4C000000"
-        BorderThickness="2"
-        CornerRadius="15"
-        Margin="7">
+            Grid.Column="2"
+            Grid.Row="1"
+            Background="Transparent"
+            BorderBrush="#4C000000"
+            BorderThickness="2"
+            CornerRadius="15"
+            Margin="7">
         </Border>
     </Grid>
 </Window>
