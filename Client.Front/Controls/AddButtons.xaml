@@ -7,16 +7,9 @@
              mc:Ignorable="d">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <Button Grid.Column="0" Background="Transparent" BorderBrush="Transparent" Click="AddPerson_Click">
-            <Image  Source="/content/AddButons/ButtonAddPerson.png" Margin="5" Width="40" Height="40" />
+        <Button Background="Transparent" BorderBrush="Transparent" Click="AddPerson_Click">
+            <Image  Source="/content/AddButons/ButtonAddPerson.png" Width="40" Height="40" />
         </Button>
-
     </Grid>
 
 </UserControl>

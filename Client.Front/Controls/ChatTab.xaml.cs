@@ -22,6 +22,8 @@ namespace Client.Front.Controls
     /// </summary>
     public partial class ChatTab : UserControl
     {
+        public event EventHandler Clicked;
+
         public string Title = "Example";
         public string LastPreview = "Example Preview";
         public string Time = "12:00";
@@ -34,5 +36,11 @@ namespace Client.Front.Controls
         {
             InitializeComponent();
         }
+
+        private void OpenChat_Click(object sender, RoutedEventArgs e)
+        {
+            Clicked?.Invoke(this, EventArgs.Empty);
+        }
+       
     }
 }

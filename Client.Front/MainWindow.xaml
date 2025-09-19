@@ -53,7 +53,7 @@
 
                 <StackPanel Name="ChatStackPanel" Grid.Row="0">
                     <ListBox ItemsSource="{Binding Chats}" SelectedItem="{Binding SelectedChat}" 
-                        BorderThickness="0" Background="Transparent" SelectionChanged="ListBox_SelectionChanged">
+                        BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Controls:ChatTab/>

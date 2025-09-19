@@ -44,6 +44,7 @@ namespace Client.Front.ViewModels
                     Title = "Чюпеп " + s,
                     LastPreview = "Последнее сообщение " + s,
                     Status = i%2 == 0 ? "online" : "offline",
+                    LastOnLineTime = (DateTime.Now + new TimeSpan(rnd.Next(24, 48), 0, 0)).ToString("t"),
 
                     Messages =
                     {

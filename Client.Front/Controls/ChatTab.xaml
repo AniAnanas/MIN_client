@@ -6,64 +6,67 @@
              xmlns:local="clr-namespace:Client.Front.Controls"
              xmlns:vm="clr-namespace:Client.Front.ViewModels"
              mc:Ignorable="d">
+
+    <Button Background="Transparent" BorderBrush="Transparent" >
+        <Border Width="280"
+                Height="65"
+                CornerRadius="10"
+                Background="#FF2D2D30"
+                BorderBrush="#FF3E3E40"
+                BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Image Grid.Column="0" Source="/content/Avatar.png" Margin="8"/>
+
+                <Grid Grid.Column="1" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="{Binding Title}" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="1" Text="{Binding LastPreview}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+
+                </Grid>
+
+
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                       Text="{Binding LastOnLineTime}"
+                       Foreground="#FFFFFF" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center" 
+                       FontSize="10" />
+
+                    <Ellipse Grid.Row="1" 
+                     Width="15" 
+                     Height="15" 
+                     Fill="#D9D9D9" 
+                     HorizontalAlignment="Center" 
+                     VerticalAlignment="Center" 
+                     Margin="7"/>
+
+                    <TextBlock Grid.Row="1" 
+                       Text="{Binding UnreadMessagesAmount}"
+                       TextAlignment="Center" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center" 
+                       FontSize="10"
+                       Margin="7"/>
+                </Grid>
+
+            </Grid>
+        </Border>
+    </Button>
     
-    <Border Width="280"
-            Height="65"
-            CornerRadius="10"
-            Background="#FF2D2D30"
-            BorderBrush="#FF3E3E40"
-            BorderThickness="1">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            
-            <Image Grid.Column="0" Source="/content/Avatar.png" Margin="8"/>
-
-            <Grid Grid.Column="1" >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Text="{Binding Title}" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                <TextBlock Grid.Row="1" Text="{Binding LastPreview}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                
-            </Grid>
-
-
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0"
-                           Text="{Binding LastMessageTime}"
-                           Foreground="#FFFFFF" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center" 
-                           FontSize="10" />
-                
-                <Ellipse Grid.Row="1" 
-                         Width="15" 
-                         Height="15" 
-                         Fill="#D9D9D9" 
-                         HorizontalAlignment="Center" 
-                         VerticalAlignment="Center" 
-                         Margin="7"/>
-                
-                <TextBlock Grid.Row="1" 
-                           Text="{Binding UnreadCount}"
-                           TextAlignment="Center" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center" 
-                           FontSize="10"
-                           Margin="7"/>
-            </Grid>
-            
-        </Grid>
-    </Border>
 </UserControl>
