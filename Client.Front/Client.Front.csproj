@@ -13,6 +13,8 @@
     <None Remove="Content\AddButons\ButtonAddGroup.png" />
     <None Remove="Content\AddButons\ButtonAddPerson.png" />
     <None Remove="Content\Avatar.png" />
+    <None Remove="Content\SendArrow.png" />
+    <None Remove="Content\Skrepka.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +27,8 @@
     <Resource Include="Content\AddButons\ButtonAddPerson.png" />
     <Resource Include="Content\Avatar.png" />
     <Resource Include="Content\icon1.png" />
+    <Resource Include="Content\SendArrow.png" />
+    <Resource Include="Content\Skrepka.png" />
   </ItemGroup>
 
 </Project>

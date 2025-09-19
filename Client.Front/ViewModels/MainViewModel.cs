@@ -42,8 +42,8 @@ namespace Client.Front.ViewModels
                     Status = i%2 == 0 ? "online" : "offline",
                     Messages =
                     {
-                        new Message { Author = "Чюпеп " + s, Content = "прив чдкд " + s },
-                        new Message { Author = "Я", Content = "прив" }
+                        new Message { Sender = "Чюпеп " + s, Content = "прив чдкд " + s },
+                        new Message { Sender = "Я", Content = "прив" }
                     }
                 });
             }
@@ -64,7 +64,7 @@ namespace Client.Front.ViewModels
         }
         private void SendMessage()
         {
-            SelectedChat.Messages.Add(new Message { Author = "Me", Content = Draft });
+            SelectedChat.Messages.Add(new Message { Sender = "Me", Content = Draft });
             SelectedChat.LastPreview = Draft;
             Draft = string.Empty;
             OnPropertyChanged(nameof(SelectedChat));

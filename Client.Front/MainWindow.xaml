@@ -86,6 +86,7 @@
             BorderThickness="2"
             CornerRadius="15"
             Margin="0,7">
+            <Controls:Chat/>
         </Border>
 
         <Border x:Name="RightBorder"

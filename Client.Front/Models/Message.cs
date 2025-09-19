@@ -4,8 +4,8 @@ namespace Client.Front.Models
 {
     public class Message
     {
-        public string Author { get; set; }
-        public string Content { get; set; }
+        public string Sender { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; } = DateTime.Now;
     }
 }
