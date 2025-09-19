@@ -11,12 +11,15 @@ namespace Client.Front.ViewModels
     {
         public ObservableCollection<ChatTab> Chats { get; } = new();
         public ObservableCollection<string> OpenChats { get; } = new();
+
         private ChatTab? _selectedChat;
         public ChatTab? SelectedChat
         {
             get { return _selectedChat; }
             set { _selectedChat = value; OnPropertyChanged(); }
+
         }
+
         private string _draft = string.Empty;
         public string Draft
         {
@@ -40,6 +43,7 @@ namespace Client.Front.ViewModels
                     Title = "Чюпеп " + s,
                     LastPreview = "Последнее сообщение " + s,
                     Status = i%2 == 0 ? "online" : "offline",
+
                     Messages =
                     {
                         new Message { Sender = "Чюпеп " + s, Content = "прив чдкд " + s },

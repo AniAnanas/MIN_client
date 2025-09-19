@@ -52,22 +52,11 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Name="ChatStackPanel" Grid.Row="0">
-                    <Controls:ChatTab/>
                     <ListBox ItemsSource="{Binding Chats}" SelectedItem="{Binding SelectedChat}" 
-                        BorderThickness="0" Background="Transparent">
+                        BorderThickness="0" Background="Transparent" SelectionChanged="ListBox_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="4" Cursor="Hand">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="40"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Ellipse Width="36" Height="36" Fill="{StaticResource AccentBrush}" Grid.Column="0"/>
-                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding LastPreview}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </StackPanel>
-                                </Grid>
+                                <Controls:ChatTab/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
