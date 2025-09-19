@@ -32,6 +32,7 @@ namespace Client.Front.ViewModels
         public MainViewModel()
         {
             //---Sample chats start---
+            var rnd = new Random();
             for (int i = 0; i <= 8; i++)
             {
                 string s = i.ToString();
@@ -42,8 +43,8 @@ namespace Client.Front.ViewModels
                     Status = i%2 == 0 ? "online" : "offline",
                     Messages =
                     {
-                        new Message { Sender = "Чюпеп " + s, Content = "прив чдкд " + s },
-                        new Message { Sender = "Я", Content = "прив" }
+                        new Message { Sender = "Чюпеп " + s, Content = "прив чдкд " + s, Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24), 0, 0) },
+                        new Message { Sender = "Я", Content = "прив", Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24, 48), 0, 0) }
                     }
                 });
             }
@@ -51,9 +52,8 @@ namespace Client.Front.ViewModels
             SelectedChat = null!;
             if (Chats.Count > 0) {
                 SelectedChat = Chats[0];
-                var rand = new Random();
-                OpenChats.Add( Chats[rand.Next(0, Chats.Count)].Title );
-                OpenChats.Add( Chats[rand.Next(0, Chats.Count)].Title );
+                OpenChats.Add( Chats[rnd.Next(0, Chats.Count)].Title );
+                OpenChats.Add( Chats[rnd.Next(0, Chats.Count)].Title );
             }
             //---Sample chats end---
 
@@ -64,6 +64,11 @@ namespace Client.Front.ViewModels
         }
         private void SendMessage()
         {
+            if (SelectedChat == null)
+            {
+                Log.Error("SelectedChat == null, called SendMessage");
+                return;
+            }
             SelectedChat.Messages.Add(new Message { Sender = "Me", Content = Draft });
             SelectedChat.LastPreview = Draft;
             Draft = string.Empty;
