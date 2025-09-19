@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Client.Front.Controls"
+             xmlns:vm="clr-namespace:Client.Front.ViewModels"
              mc:Ignorable="d">
     
     <Border Width="280"
@@ -11,8 +12,7 @@
             CornerRadius="10"
             Background="#FF2D2D30"
             BorderBrush="#FF3E3E40"
-            BorderThickness="1"
-            Margin="5">
+            BorderThickness="1">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -22,14 +22,15 @@
             
             <Image Grid.Column="0" Source="/content/Avatar.png" Margin="8"/>
 
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="1" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="{Binding Title}" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                <TextBlock Grid.Row="1" Text="Hello World!" Foreground="#B3B3B3" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="1" Text="{Binding LastPreview}" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                
             </Grid>
 
 
@@ -39,9 +40,28 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="14:24" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
-                <Ellipse Grid.Row="1" Width="15" Height="15" Fill="#D9D9D9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="1" Text="1" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
+                <TextBlock Grid.Row="0"
+                           Text="{Binding LastMessageTime}"
+                           Foreground="#FFFFFF" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center" 
+                           FontSize="10" />
+                
+                <Ellipse Grid.Row="1" 
+                         Width="15" 
+                         Height="15" 
+                         Fill="#D9D9D9" 
+                         HorizontalAlignment="Center" 
+                         VerticalAlignment="Center" 
+                         Margin="7"/>
+                
+                <TextBlock Grid.Row="1" 
+                           Text="{Binding UnreadCount}"
+                           TextAlignment="Center" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center" 
+                           FontSize="10"
+                           Margin="7"/>
             </Grid>
             
         </Grid>

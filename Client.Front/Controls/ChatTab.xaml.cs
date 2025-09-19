@@ -26,6 +26,8 @@ namespace Client.Front.Controls
         public string LastPreview = "Example Preview";
         public string Time = "12:00";
         public int Unread = 0;
+
+        public string UnreadStr => Unread.ToString();
         public bool showUnreadMark => Unread > 0;
 
         public ChatTab()

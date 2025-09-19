@@ -16,9 +16,6 @@ using System.Windows.Shapes;
 
 namespace Client.Front.Controls
 {
-    /// <summary>
-    /// Логика взаимодействия для Chat.xaml
-    /// </summary>
     public partial class Chat : UserControl, INotifyPropertyChanged
     {
         public Chat()
@@ -38,6 +35,7 @@ namespace Client.Front.Controls
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            // я не знаю чёто спокойно въебать можем тут на будущее короче
             if (e.Handled) return;
         }
 
@@ -51,15 +49,16 @@ namespace Client.Front.Controls
                     Input_Area.AppendText(Environment.NewLine);
                     return;
                 } 
-                else if (!string.IsNullOrWhiteSpace(""))
+                else if (!string.IsNullOrWhiteSpace(MessageText))
                 {
-
+                    //типо отправкак тут будэ
                 }
             }
         }
 
         private void Input_Area_Drop(object sender, DragEventArgs e)
         {
+            //тут типо сюда файлы кидать через курсор братан(ну ты тип понял драг н дроп)0
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
