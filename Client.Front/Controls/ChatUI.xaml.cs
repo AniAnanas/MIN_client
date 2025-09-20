@@ -16,9 +16,9 @@ using System.Windows.Shapes;
 
 namespace Client.Front.Controls
 {
-    public partial class Chat : UserControl, INotifyPropertyChanged
+    public partial class ChatUI : UserControl, INotifyPropertyChanged
     {
-        public Chat()
+        public ChatUI()
         {
             InitializeComponent();
         }

@@ -25,7 +25,7 @@ namespace Client.Front
         public string timeBoot;
         public string currentDir;
         public static MainWindow? Instance;
-        public ObservableCollection<Tab> ChatTabs { get; } = new();
+        public ObservableCollection<TabModel> ChatTabs { get; } = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -83,7 +83,7 @@ namespace Client.Front
 
         private void AddChat()
         {
-            ChatTab newChat = new ChatTab();
+            TabModel newChat = new TabModel();
             ChatStackPanel.Children.Add(newChat);
         }
 

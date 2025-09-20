@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Client.Front.Models
 {
-    public class Message : INotifyPropertyChanged
+    public class MessageModel : INotifyPropertyChanged
     {
         private int _id = default;
         private string _text = string.Empty;

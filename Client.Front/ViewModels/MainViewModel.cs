@@ -1,19 +1,23 @@
-﻿using System;
+﻿using Client.Front.Controls;
+using Client.Front.Models;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
-using Client.Front.Models;
 
 namespace Client.Front.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<Tab> ChatTabs { get; } = new();
+        public TopBarUI TopBar { get; set; }
+        public ObservableCollection<TabModel> ChatTabs { get; } = new();
         public ObservableCollection<string> OpenChats { get; } = new();
 
-        private Tab? _selectedChat;
-        public Tab? SelectedChat
+        private TabModel? _selectedChat;
+        public TabModel? SelectedChat
         {
             get { return _selectedChat; }
             set { _selectedChat = value; OnPropertyChanged(); }
@@ -27,11 +31,6 @@ namespace Client.Front.ViewModels
             set { _draft = value; OnPropertyChanged(); }
         }
 
-        public ICommand SendCommand { get; }
-        public ICommand NewChatCommand { get; }
-        public ICommand SearchCommand { get; }
-        public ICommand SettingsCommand { get; }
-
         public MainViewModel()
         {
             //---Sample chats start---
@@ -39,7 +38,7 @@ namespace Client.Front.ViewModels
             for (int i = 0; i <= 8; i++)
             {
                 string s = i.ToString();
-                ChatTabs.Add(new Tab
+                ChatTabs.Add(new TabModel
                 {
                     Title = "Чюпеп " + s,
                     LastMessage = "Последнее сообщение " + s,
@@ -48,11 +47,14 @@ namespace Client.Front.ViewModels
 
                     //Messages =
                     //{
-                    //    new Message { SenderName = "Чюпеп " + s, Text = "прив чдкд " + s, Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24), 0, 0) },
-                    //    new Message { SenderName = "Я", Text = "прив", Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24, 48), 0, 0) }
+                    //    new MessageModel { SenderName = "Чюпеп " + s, Text = "прив чдкд " + s, Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24), 0, 0) },
+                    //    new MessageModel { SenderName = "Я", Text = "прив", Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24, 48), 0, 0) }
                     //}
                 });
             }
+
+            TopBar = new TopBarUI();
+
 
             SelectedChat = null!;
             if (ChatTabs.Count > 0) {
@@ -64,6 +66,36 @@ namespace Client.Front.ViewModels
             NewChatCommand = new RelayCommand(_ => CreateChat());
             SearchCommand = new RelayCommand(_ => { });
             SettingsCommand = new RelayCommand(_ => { });
+            MinimizeWindowCommand = new RelayCommand(p => {
+                if (p is Window window) window.WindowState = WindowState.Minimized;
+            });
+
+            MaximizeWindowCommand = new RelayCommand(p => {
+                if (p is Window window)
+                {
+                    window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+                    if (window.WindowState == WindowState.Maximized)
+                    {
+                        window.WindowState = WindowState.Normal;
+                        if (topBar.FindName("MaximizeBtn") is Button maximizeBtn)
+                        {
+                            maximizeBtn.Content = "□";
+                        }
+                    }
+                    else
+                    {
+                        window.WindowState = WindowState.Maximized;
+                        if (topBar.FindName("MaximizeBtn") is Button maximizeBtn)
+                        {
+                            maximizeBtn.Content = "❐";
+                        }
+                    }
+                }
+            });
+
+            CloseWindowCommand = new RelayCommand(p => {
+                if (p is Window window) window.Close();
+            });
         }
         private void SendMessage()
         {
@@ -72,19 +104,24 @@ namespace Client.Front.ViewModels
                 Log.Error("SelectedChat == null, called SendMessage");
                 return;
             }
-            //SelectedChat.Messages.Add(new Message { SenderName = "Me", Text = Draft });
+            //SelectedChat.Messages.Add(new MessageModel { SenderName = "Me", Text = Draft });
             SelectedChat.LastMessage = Draft;
             Draft = string.Empty;
             OnPropertyChanged(nameof(SelectedChat));
         }
         private void CreateChat()
         {
-            var c = new Tab { Title = "New Chat", LastMessage = "", isOnline = false };
+            var c = new TabModel { Title = "New ChatUI", LastMessage = "", isOnline = false };
             ChatTabs.Add(c);
             SelectedChat = c;
         }
-
-
+        public ICommand SendCommand { get; }
+        public ICommand NewChatCommand { get; }
+        public ICommand SearchCommand { get; }
+        public ICommand SettingsCommand { get; }
+        public ICommand MinimizeWindowCommand { get; }
+        public ICommand MaximizeWindowCommand { get; }
+        public ICommand CloseWindowCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         void OnPropertyChanged([CallerMemberName] string n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));

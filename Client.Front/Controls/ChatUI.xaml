@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Client.Front.Controls.Chat"
+﻿<UserControl x:Class="Client.Front.Controls.ChatUI"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -19,7 +19,7 @@
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
             <ItemsControl ItemsSource="{Binding Messages}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type models:Message}">
+                    <DataTemplate DataType="{x:Type models:MessageModel}">
                         <Border Margin="0,4" 
                                 CornerRadius="12" 
                                 MaxWidth="400">

@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace Client.Front.Models
 {
-    public class Tab : INotifyPropertyChanged
+    public class TabModel : INotifyPropertyChanged
     {
         private string _id = string.Empty;
         private string _title = string.Empty;

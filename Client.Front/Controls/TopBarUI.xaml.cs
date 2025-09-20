@@ -16,13 +16,14 @@ using System.Windows.Shapes;
 namespace Client.Front.Controls
 {
     /// <summary>
-    /// Логика взаимодействия для TopBar.xaml
+    /// Логика взаимодействия для TopBarUI.xaml
     /// </summary>
-    public partial class TopBar : UserControl
+    public partial class TopBarUI : UserControl
     {
-        public TopBar()
+        public TopBarUI()
         {
             InitializeComponent();
+            DataContext = new ViewModels.TobBar();
         }
 
         // Свойство для заголовка
@@ -34,7 +35,7 @@ namespace Client.Front.Controls
 
         public static readonly DependencyProperty WindowTitleProperty =
             DependencyProperty.Register("WindowTitle", typeof(string),
-                typeof(TopBar), new PropertyMetadata("My App"));
+                typeof(TopBarUI), new PropertyMetadata("My App"));
 
         // События для кнопок
         public event EventHandler MinimizeClicked;

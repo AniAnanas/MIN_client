@@ -78,9 +78,9 @@ namespace Client.Front.Models
             ChatType.Group => "Группа",
             _ => string.Empty
         };
-        public Tab GetTabFromChat()
+        public TabModel GetTabFromChat()
         {
-            return new Tab
+            return new TabModel
             {
                 Id = Id,
                 Title = Title,

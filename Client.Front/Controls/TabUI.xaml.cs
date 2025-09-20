@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Client.Front.Models;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,19 +17,27 @@ using System.Windows.Shapes;
 
 namespace Client.Front.Controls
 {
-    /// <summary>
-    /// Логика взаимодействия для AddButtons.xaml
-    /// </summary>
-    public partial class AddButtons : UserControl
+    public partial class TabUI : UserControl
     {
         public event EventHandler Clicked;
-        public AddButtons()
+
+        public string Title = "Example";
+        public string LastPreview = "Example Preview";
+        public string Time = "12:00";
+        public int Unread = 0;
+
+        public string UnreadStr => Unread.ToString();
+        public bool showUnreadMark => Unread > 0;
+
+        public TabUI()
         {
             InitializeComponent();
         }
-        private void AddPerson_Click(object sender, RoutedEventArgs e)
+
+        private void OpenChat_Click(object sender, RoutedEventArgs e)
         {
             Clicked?.Invoke(this, EventArgs.Empty);
         }
+       
     }
 }

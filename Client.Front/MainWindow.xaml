@@ -28,7 +28,7 @@
             <!--<RowDefinition Height="30"/>-->
         </Grid.RowDefinitions>
 
-        <Controls:TopBar x:Name="topBar"
+        <Controls:TopBarUI x:Name="topBar"
              Grid.Row="0" 
              Grid.Column="0" 
              Grid.ColumnSpan="3" 
@@ -56,13 +56,13 @@
                         BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Controls:ChatTab/>
+                                <Controls:TabUI/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </StackPanel>
 
-                <Controls:AddButtons Grid.Row="1" Clicked="AddPerson_Clicked" />
+                <Controls:AddButtonUI Grid.Row="1" Clicked="AddPerson_Clicked" />
             </Grid>
 
         </Border>
@@ -75,7 +75,7 @@
             BorderThickness="2"
             CornerRadius="15"
             Margin="0,7">
-            <Controls:Chat/>
+            <Controls:ChatUI/>
         </Border>
 
         <Border x:Name="RightBorder"
