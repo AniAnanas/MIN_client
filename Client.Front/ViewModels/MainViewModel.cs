@@ -9,11 +9,11 @@ namespace Client.Front.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<ChatTab> Chats { get; } = new();
+        public ObservableCollection<Tab> ChatTabs { get; } = new();
         public ObservableCollection<string> OpenChats { get; } = new();
 
-        private ChatTab? _selectedChat;
-        public ChatTab? SelectedChat
+        private Tab? _selectedChat;
+        public Tab? SelectedChat
         {
             get { return _selectedChat; }
             set { _selectedChat = value; OnPropertyChanged(); }
@@ -39,26 +39,24 @@ namespace Client.Front.ViewModels
             for (int i = 0; i <= 8; i++)
             {
                 string s = i.ToString();
-                Chats.Add(new ChatTab
+                ChatTabs.Add(new Tab
                 {
                     Title = "Чюпеп " + s,
-                    LastPreview = "Последнее сообщение " + s,
-                    Status = i%2 == 0 ? "online" : "offline",
-                    LastOnLineTime = (DateTime.Now + new TimeSpan(rnd.Next(24, 48), 0, 0)).ToString("t"),
+                    LastMessage = "Последнее сообщение " + s,
+                    isOnline = i%2 == 0,
+                    //LastOnlineTime = (Timestamp.Now + new TimeSpan(rnd.Next(24, 48), 0, 0)).ToString("t"),
 
-                    Messages =
-                    {
-                        new Message { Sender = "Чюпеп " + s, Content = "прив чдкд " + s, Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24), 0, 0) },
-                        new Message { Sender = "Я", Content = "прив", Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24, 48), 0, 0) }
-                    }
+                    //Messages =
+                    //{
+                    //    new Message { SenderName = "Чюпеп " + s, Text = "прив чдкд " + s, Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24), 0, 0) },
+                    //    new Message { SenderName = "Я", Text = "прив", Timestamp = DateTime.Now + new TimeSpan(rnd.Next(24, 48), 0, 0) }
+                    //}
                 });
             }
 
             SelectedChat = null!;
-            if (Chats.Count > 0) {
-                SelectedChat = Chats[0];
-                OpenChats.Add( Chats[rnd.Next(0, Chats.Count)].Title );
-                OpenChats.Add( Chats[rnd.Next(0, Chats.Count)].Title );
+            if (ChatTabs.Count > 0) {
+                SelectedChat = ChatTabs[rnd.Next(0, ChatTabs.Count)];
             }
             //---Sample chats end---
 
@@ -74,15 +72,15 @@ namespace Client.Front.ViewModels
                 Log.Error("SelectedChat == null, called SendMessage");
                 return;
             }
-            SelectedChat.Messages.Add(new Message { Sender = "Me", Content = Draft });
-            SelectedChat.LastPreview = Draft;
+            //SelectedChat.Messages.Add(new Message { SenderName = "Me", Text = Draft });
+            SelectedChat.LastMessage = Draft;
             Draft = string.Empty;
             OnPropertyChanged(nameof(SelectedChat));
         }
         private void CreateChat()
         {
-            var c = new ChatTab { Title = "New Chat", LastPreview = "", Status = "offline" };
-            Chats.Add(c);
+            var c = new Tab { Title = "New Chat", LastMessage = "", isOnline = false };
+            ChatTabs.Add(c);
             SelectedChat = c;
         }
 

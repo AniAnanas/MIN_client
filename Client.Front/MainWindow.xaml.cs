@@ -1,4 +1,7 @@
 ﻿using Client.Front.Controls;
+using Client.Front.Models;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -16,12 +19,13 @@ namespace Client.Front
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public Config? config;
         public string timeBoot;
         public string currentDir;
         public static MainWindow? Instance;
+        public ObservableCollection<Tab> ChatTabs { get; } = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -81,6 +85,13 @@ namespace Client.Front
         {
             ChatTab newChat = new ChatTab();
             ChatStackPanel.Children.Add(newChat);
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

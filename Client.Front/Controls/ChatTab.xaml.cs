@@ -17,9 +17,6 @@ using System.Windows.Shapes;
 
 namespace Client.Front.Controls
 {
-    /// <summary>
-    /// Логика взаимодействия для ChatTab.xaml
-    /// </summary>
     public partial class ChatTab : UserControl
     {
         public event EventHandler Clicked;
