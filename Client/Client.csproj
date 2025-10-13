@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Content\AddButons\ButtonAddChanel.png" />
+    <None Remove="Content\AddButons\ButtonAddGroup.png" />
+    <None Remove="Content\AddButons\ButtonAddPerson.png" />
+    <None Remove="Content\Avatar.png" />
+    <None Remove="Content\SendArrow.png" />
+    <None Remove="Content\Skrepka.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.32.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Content\AddButons\ButtonAddChanel.png" />
+    <Resource Include="Content\AddButons\ButtonAddGroup.png" />
+    <Resource Include="Content\AddButons\ButtonAddPerson.png" />
+    <Resource Include="Content\Avatar.png" />
+    <Resource Include="Content\icon1.png" />
+    <Resource Include="Content\SendArrow.png" />
+    <Resource Include="Content\Skrepka.png" />
+  </ItemGroup>
+
+</Project>

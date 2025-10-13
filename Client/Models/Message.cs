@@ -1,0 +1,58 @@
+﻿using System;
+using System.ComponentModel;
+
+namespace Client.Models
+{
+    public class MessageModel : INotifyPropertyChanged
+    {
+        private int _id = default;
+        private string _text = string.Empty;
+        private DateTime _timestamp = DateTime.UnixEpoch;
+        private bool _isOwn;
+        private ChatModel _chat = new();
+        private UserModel _sender = new(0, "null");
+        private string? _avatar;
+        public int Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(nameof(Id)); }
+        }
+        public bool IsOwn
+        {
+            get => _isOwn;
+            set { _isOwn = value; OnPropertyChanged(nameof(IsOwn)); }
+        }
+        public ChatModel Chat
+        {
+            get => _chat;
+            set { _chat = value; OnPropertyChanged(nameof(Chat)); }
+        }
+        public UserModel Sender
+        {
+            get => _sender;
+            set { _sender = value; OnPropertyChanged(nameof(Sender)); }
+        }
+        public string Text
+        {
+            get => _text;
+            set { _text = value; OnPropertyChanged(nameof(Text)); }
+        }
+        public DateTime Timestamp
+        {
+            get => _timestamp;
+            set { _timestamp = value; OnPropertyChanged(nameof(Timestamp)); }
+        }
+        public string? Avatar
+        {
+            get => _avatar;
+            set { _avatar = value; OnPropertyChanged(nameof(Avatar)); }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}
