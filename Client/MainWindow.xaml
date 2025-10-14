@@ -45,7 +45,7 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Name="ChatStackPanel" Grid.Row="0">
-                    <ListBox ItemsSource="{Binding TabListViewModel.Tabs}" SelectedItem="{Binding TabListViewModel.SelectedTab}" 
+                    <ListBox ItemsSource="{Binding TabListViewModel.Chats}" SelectedItem="{Binding TabListViewModel.SelectedChat}" 
                         BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
