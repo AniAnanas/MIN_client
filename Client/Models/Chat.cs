@@ -20,7 +20,6 @@ namespace Client.Models
         private string? _avatar;
         //private UserModel[] _members = new UserModel[] { };
         private MessageModel _lastMessage = new();
-        private string _time = string.Empty;
         private int _unreadCount;
         private bool _isOnline;
         private ChatType _type;
@@ -56,8 +55,11 @@ namespace Client.Models
 
         public string Time
         {
-            get => _time;
-            set { if (_time == value) return; _time = value; OnPropertyChanged(nameof(Time)); }
+            get => (DateTime.Now - LastMessage.Timestamp) < new TimeSpan(1, 0, 0, 0)
+                ? LastMessage.Timestamp.ToString("HH:mm")
+                : (DateTime.Now - LastMessage.Timestamp) < new TimeSpan(7, 0, 0, 0)
+                    ? LastMessage.Timestamp.ToString("ddd")
+                    : LastMessage.Timestamp.ToString("dd.MM.yyyy");
         }
 
         public int UnreadCount

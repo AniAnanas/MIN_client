@@ -20,10 +20,11 @@ namespace Client.ViewModels
         public bool IsOwn => _message.IsOwn;
         public UserModel Sender => _message.Sender;
         public string? Avatar => _message.Avatar;
-
         public string DisplayTime => Timestamp.ToString("HH:mm");
 
-        public string SenderName => IsOwn ? "You" : Sender.Name;
+        public string SenderName => IsOwn
+            ? "You"
+            : Sender.Fullname;
 
         public bool ShowAvatar => !IsOwn;
 

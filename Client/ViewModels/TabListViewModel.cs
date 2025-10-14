@@ -3,15 +3,25 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Client.ViewModels
 {
-    public class ChatsListViewModel : INotifyPropertyChanged
+    public class TabListViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<TabViewModel> Tabs { get; } = new ObservableCollection<TabViewModel>();
+        public ObservableCollection<TabViewModel> Tabs { get; } = [];
+        private TabViewModel? _selectedTab;
+        public TabViewModel? SelectedTab
+        {
+            get => _selectedTab;
+            set
+            {
+                if (_selectedTab != value)
+                {
+                    _selectedTab = value;
+                    RaisePropertyChanged(nameof(SelectedTab));
+                }
+            }
+        }
 
         // При поступлении новых ChatModel:
         public void AddChat(ChatModel chat)

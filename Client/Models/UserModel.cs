@@ -25,6 +25,10 @@ namespace Client.Models
             get => _lastName;
             set { if (_lastName == value) return; _lastName = value; OnPropertyChanged(nameof(LastName)); }
         }
+        public string Fullname =>
+            (string.IsNullOrWhiteSpace(LastName)
+                ? Name
+                : string.Concat(Name, " ", LastName)).Truncate(64);
         public string Username
         {
             get => _username;

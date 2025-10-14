@@ -90,7 +90,7 @@ namespace Client.ViewModels
             switch (CurrentView)
             {
                 case ViewType.ChatList:
-                    CurrentViewModel = new ChatListViewModel();
+                    CurrentViewModel = new TabListViewModel();
                     break;
                 //case ViewType.Settings:
                 //    CurrentViewModel = new SettingsViewModel();

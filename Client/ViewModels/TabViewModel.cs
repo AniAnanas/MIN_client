@@ -70,9 +70,14 @@ namespace Client.ViewModels
                 RaisePropertyChanged(nameof(HasUnread));
             }
         }
+        public string Time =>
+            (DateTime.Now - LastMessage.Timestamp) < new TimeSpan(1, 0, 0, 0)
+            ? LastMessage.Timestamp.ToString("HH:mm")
+            : (DateTime.Now - LastMessage.Timestamp) < new TimeSpan(7, 0, 0, 0)
+                ? LastMessage.Timestamp.ToString("ddd")
+                : LastMessage.Timestamp.ToString("dd.MM.yyyy");
 
         public bool HasUnread => UnreadCount > 0;
-
         public string TypeBadgeText => _chat.TypeBadgeText;
         public bool ShowTypeBadge => _chat.ShowTypeBadge;
 

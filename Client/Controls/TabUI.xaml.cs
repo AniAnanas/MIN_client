@@ -39,7 +39,7 @@ namespace Client.Controls
             if (e.ChangedButton == MouseButton.Left && ViewModel != null)
             {
                 // Notify parent to select this tab
-                var parent = System.Windows.Media.VisualTreeHelper.GetParent(this) as System.Windows.FrameworkElement;
+                var parent = System.Windows.Media.VisualTreeHelper.GetParent(this) as FrameworkElement;
                 if (parent != null)
                 {
                     // Find the parent ListBox
@@ -52,16 +52,16 @@ namespace Client.Controls
             }
         }
 
-        private System.Windows.Controls.ListBox? FindParentListBox(System.Windows.FrameworkElement element)
+        private ListBox? FindParentListBox(FrameworkElement element)
         {
-            var parent = System.Windows.Media.VisualTreeHelper.GetParent(element) as System.Windows.FrameworkElement;
+            var parent = System.Windows.Media.VisualTreeHelper.GetParent(element) as FrameworkElement;
             while (parent != null)
             {
-                if (parent is System.Windows.Controls.ListBox listBox)
+                if (parent is ListBox listBox)
                 {
                     return listBox;
                 }
-                parent = System.Windows.Media.VisualTreeHelper.GetParent(parent) as System.Windows.FrameworkElement;
+                parent = System.Windows.Media.VisualTreeHelper.GetParent(parent) as FrameworkElement;
             }
             return null;
         }

@@ -17,7 +17,7 @@ namespace Client
         public MainWindow()
         {
             InitializeComponent();
-
+            DataContext = new MainViewModel(this);
             // DataContext is set in XAML to MainViewModel
             currentDir = Directory.GetCurrentDirectory();
             timeBoot = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");

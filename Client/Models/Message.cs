@@ -9,7 +9,7 @@ namespace Client.Models
         private string _text = string.Empty;
         private DateTime _timestamp = DateTime.UnixEpoch;
         private bool _isOwn;
-        private ChatModel _chat = new();
+        private ChatModel? _chat;
         private UserModel _sender = new(0, "null");
         private string? _avatar;
         public int Id

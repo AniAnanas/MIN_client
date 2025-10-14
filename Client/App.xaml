@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <!-- Простейшая тёмная палитра -->
         <Color x:Key="BgColor">#FF121212</Color>
         <Color x:Key="PanelColor">#FF1E1E1E</Color>

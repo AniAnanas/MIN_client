@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Client.Front"
         xmlns:vm="clr-namespace:Client.ViewModels"
-        xmlns:Controls="clr-namespace:Client.Controls"
+        xmlns:Controls="clr-namespace:Client.Controls" d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
         Title="MainWindow"
         d:Width="1920" 
@@ -22,16 +22,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
-            <!--<RowDefinition Height="30"/>-->
         </Grid.RowDefinitions>
 
-        <!--<Controls:TopBarUI x:Name="topBar"
+        <Controls:TopBarUI x:Name="topBar"
              Grid.Row="0" 
              Grid.Column="0" 
-             Grid.ColumnSpan="3" 
-             MinimizeClicked="TopBar_MinimizeClicked"
-             MaximizeClicked="TopBar_MaximizeClicked"
-             CloseClicked="TopBar_CloseClicked"/>-->
+             Grid.ColumnSpan="3"/>
 
         <Border Name="LeftBorder"
              Grid.Column="0"
@@ -49,7 +45,7 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Name="ChatStackPanel" Grid.Row="0">
-                    <ListBox ItemsSource="{Binding ChatTabs}" SelectedItem="{Binding SelectedChat}" 
+                    <ListBox ItemsSource="{Binding TabListViewModel.Tabs}" SelectedItem="{Binding TabListViewModel.SelectedTab}" 
                         BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -59,7 +55,7 @@
                     </ListBox>
                 </StackPanel>
 
-                <Controls:AddButtonUI Grid.Row="1" Clicked="AddPerson_Clicked" />
+                <Controls:AddButtonUI Grid.Row="1"/>
             </Grid>
 
         </Border>
