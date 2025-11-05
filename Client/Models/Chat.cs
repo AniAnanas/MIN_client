@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Google.Protobuf.WellKnownTypes;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -7,106 +9,49 @@ using System.Threading.Tasks;
 
 namespace Client.Models
 {
-    public enum ChatType
+    public class ChatModel : BaseModel
     {
-        Personal,
-        Group,
-        Channel
-    }
-    public class ChatModel : INotifyPropertyChanged
-    {
-        private string _id = string.Empty;
-        private string _name = string.Empty;
-        private string? _avatar;
-        //private UserModel[] _members = new UserModel[] { };
-        private MessageModel _lastMessage = new();
+        private int _id = default;
+        private UserModel _user = new(0, "None", "None");
+        private ObservableCollection<MessageModel> _messages;
         private int _unreadCount;
-        private bool _isOnline;
-        private ChatType _type;
+        //private ChatType _type;
 
-        public string Id
+        public int Id
         {
             get => _id;
-            set { if (_id == value) return; _id = value; OnPropertyChanged(nameof(Id)); }
+            set { OnPropertyChanged(ref _id, value, nameof(Id)); }
         }
-
-        public string Title
+        public UserModel User
         {
-            get => _name;
-            set { if (_name == value) return; _name = value; OnPropertyChanged(nameof(Title)); }
+            get => _user;
+            set { OnPropertyChanged(ref _user, value, nameof(User)); }
         }
-
-        public string? Avatar
+        public ObservableCollection<MessageModel> Messages
         {
-            //get => Type switch
-            //{
-            //    ChatType.Personal => _members[0].Avatar,
-            //    _ => _avatar
-            //};
-            get => _avatar;
-            set { if (_avatar == value) return; _avatar = value; OnPropertyChanged(nameof(Avatar)); }
+            get => _messages;
+            set { _messages = value; }
         }
 
         public MessageModel LastMessage
         {
-            get => _lastMessage;
-            set { if (_lastMessage == value) return; _lastMessage = value; OnPropertyChanged(nameof(LastMessage)); }
+            get => _messages.OrderBy((m) => m.Id).Last();
         }
 
-        public string Time
-        {
-            get => (DateTime.Now - LastMessage.Timestamp) < new TimeSpan(1, 0, 0, 0)
-                ? LastMessage.Timestamp.ToString("HH:mm")
-                : (DateTime.Now - LastMessage.Timestamp) < new TimeSpan(7, 0, 0, 0)
-                    ? LastMessage.Timestamp.ToString("ddd")
-                    : LastMessage.Timestamp.ToString("dd.MM.yyyy");
-        }
-
+        public string Time => LastMessage.Time;
+        
         public int UnreadCount
         {
             get => _unreadCount;
-            set { if (_unreadCount == value) return; _unreadCount = value; OnPropertyChanged(nameof(UnreadCount)); }
+            set { OnPropertyChanged(ref _unreadCount, value, nameof(UnreadCount)); }
         }
+        public bool HasUnread { get => UnreadCount > 0; }
 
-        public bool IsOnline
+        public ChatModel(int id, UserModel user, ObservableCollection<MessageModel>? messages = null)
         {
-            get => _isOnline;
-            set { if (_isOnline == value) return; _isOnline = value; OnPropertyChanged(nameof(IsOnline)); }
-        }
-
-        public ChatType Type
-        {
-            get => _type;
-            set { if (_type == value) return; _type = value; OnPropertyChanged(nameof(Type)); }
-        }
-
-        public string TypeBadgeText => Type switch
-        {
-            ChatType.Channel => "Канал",
-            ChatType.Group => "Группа",
-            _ => string.Empty
-        };
-
-        public TabModel GetTabFromChat()
-        {
-            return new TabModel
-            {
-                Id = Id,
-                Title = Title,
-                LastMessage = LastMessage,
-                isOnline = IsOnline,
-                Avatar = Avatar,
-                UnreadCount = UnreadCount
-            };
-        }
-
-        public bool ShowTypeBadge => Type != ChatType.Personal;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            Id = id;
+            User = user;
+            Messages = messages ?? [];
         }
     }
 }

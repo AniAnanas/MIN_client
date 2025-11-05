@@ -2,6 +2,7 @@ using Client.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Client.ViewModels
@@ -83,23 +84,19 @@ namespace Client.ViewModels
         }
         private void CreateNewChat()
         {
-            var newChat = new ChatModel
-            {
-                Id = Guid.NewGuid().ToString(),
-                Title = "New Chat",
-                IsOnline = false,
-                Type = ChatType.Personal,
-                LastMessage = new MessageModel
-                {
-                    Sender = new UserModel(new Random().Next(), "newUser " + _chats.Count),
-                }
-            };
+            var rnd = new Random();
+            var user = new UserModel(rnd.Next(), "newUser " + _chats.Count);
+            var newChat = new ChatModel(
+                rnd.Next(),
+                user,
+                [ new(0, "Первое сообщ", DateTime.Now, user), new(1, "второе сообщ", DateTime.Now + new TimeSpan(rnd.Next(0, 8), 0, 0), new(1, "chupep")) ]
+            );
 
             var chatViewModel = new TabViewModel(newChat);
             _chats.Add(chatViewModel);
 
             SelectedChat = chatViewModel;
-            Log.Info($"Created new chat: {newChat.Title}");
+            Log.Info($"Created new chat: {newChat.User.Fullname}");
         }
         private void CreateMockChats()
         {
@@ -107,23 +104,14 @@ namespace Client.ViewModels
 
             for (int i = 0; i < 5; i++)
             {
+                var user = new UserModel(i, "user" + i, "User " + (i + 1)) { IsOnline = i % 2 == 0 };
                 DateTime timestamp = DateTime.Now.AddMinutes(-random.Next(0, 60));
-                var chat = new ChatModel
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Title = $"Chat {i + 1}",
-                    Avatar = null,
-                    LastMessage = new MessageModel
-                    {
-                        Id = random.Next(),
-                        Sender = new UserModel(i, "user" + i),
-                        Text = $"This is the last message in Chat {i + 1}",
-                        Timestamp = timestamp
-                    },
-                    IsOnline = i % 2 == 0,
-                    Type = i % 3 == 0 ? ChatType.Group : ChatType.Personal,
-                    UnreadCount = random.Next(0, 10),
-                };
+                var chat = new ChatModel(i, user,
+                    [
+                        new(0, $"This is first message in Chat {i + 1}", timestamp, user),
+                        new(1, $"This is the last message in Chat {i + 1}", timestamp, user),
+                    ]
+                );
 
                 var chatViewModel = new TabViewModel(chat);
                 _chats.Add(chatViewModel);

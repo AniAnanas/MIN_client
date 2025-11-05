@@ -19,16 +19,16 @@ namespace Client.ViewModels
             _chat = chat ?? throw new ArgumentNullException(nameof(chat));
             // Initial projection
             Id = _chat.Id;
-            Title = _chat.Title;
-            Avatar = _chat.Avatar;
+            Title = _chat.User.Fullname;
+            Avatar = _chat.User.Avatar;
             LastMessage = _chat.LastMessage;
-            IsOnline = _chat.IsOnline;
+            IsOnline = _chat.User.IsOnline;
             UnreadCount = _chat.UnreadCount;
             // Subscribe to changes
             _chat.PropertyChanged += ChatOnPropertyChanged;
         }
 
-        public string Id { get; private set; } = string.Empty;
+        public int Id { get; private set; } = default;
 
         private string _title = string.Empty;
         public string Title
@@ -44,7 +44,7 @@ namespace Client.ViewModels
             set { if (_avatar == value) return; _avatar = value; RaisePropertyChanged(); }
         }
 
-        private MessageModel _lastMessage = new();
+        private MessageModel _lastMessage;
         public MessageModel LastMessage
         {
             get => _lastMessage;
@@ -84,8 +84,6 @@ namespace Client.ViewModels
         }
 
         public bool HasUnread => UnreadCount > 0;
-        public string TypeBadgeText => _chat.TypeBadgeText;
-        public bool ShowTypeBadge => _chat.ShowTypeBadge;
 
         private void ChatOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -95,24 +93,20 @@ namespace Client.ViewModels
                 case nameof(ChatModel.Id):
                     Id = _chat.Id;
                     break;
-                case nameof(ChatModel.Title):
-                    Title = _chat.Title;
+                case nameof(ChatModel.User.Fullname):
+                    Title = _chat.User.Fullname;
                     break;
-                case nameof(ChatModel.Avatar):
-                    Avatar = _chat.Avatar;
+                case nameof(ChatModel.User.Avatar):
+                    Avatar = _chat.User.Avatar;
                     break;
                 case nameof(ChatModel.LastMessage):
                     LastMessage = _chat.LastMessage;
                     break;
-                case nameof(ChatModel.IsOnline):
-                    IsOnline = _chat.IsOnline;
+                case nameof(ChatModel.User.IsOnline):
+                    IsOnline = _chat.User.IsOnline;
                     break;
                 case nameof(ChatModel.UnreadCount):
                     UnreadCount = _chat.UnreadCount;
-                    break;
-                case nameof(ChatModel.Type):
-                    RaisePropertyChanged(nameof(TypeBadgeText));
-                    RaisePropertyChanged(nameof(ShowTypeBadge));
                     break;
 
                     // other mapped properties...

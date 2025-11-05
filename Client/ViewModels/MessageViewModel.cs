@@ -16,15 +16,15 @@ namespace Client.ViewModels
 
         public int Id => _message.Id;
         public string Text => _message.Text;
-        public DateTime Timestamp => _message.Timestamp;
+        public UserModel User => _message.User;
         public bool IsOwn => _message.IsOwn;
-        public UserModel Sender => _message.Sender;
-        public string? Avatar => _message.Avatar;
-        public string DisplayTime => Timestamp.ToString("HH:mm");
+        public string? Avatar => _message.User.Avatar;
+        public DateTime Timestamp => _message.Timestamp;
+        public string DisplayTime => _message.Time;
 
         public string SenderName => IsOwn
             ? "You"
-            : Sender.Fullname;
+            : User.Fullname;
 
         public bool ShowAvatar => !IsOwn;
 

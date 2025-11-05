@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Client.Controls"
-             xmlns:models="clr-namespace:Client.Models"
+             xmlns:models="clr-namespace:Client.Models" 
+             xmlns:viewmodels="clr-namespaceшарп :Client.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Background="Transparent"
@@ -18,7 +19,7 @@
 
         <!-- Сообщения -->
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Focusable="False">
-            <ItemsControl ItemsSource="{Binding Messages}" Focusable="False">
+            <ItemsControl ItemsSource="{Binding Messages}" DataContext="{}" Focusable="False">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel
@@ -32,14 +33,14 @@
                                 CornerRadius="12" 
                                 MaxWidth="400">
                             <StackPanel Margin="12,8">
-                                <TextBlock Text="{Binding Sender}" 
+                                <TextBlock Text="{Binding User}" 
                                            Foreground="#AAAAAA" 
                                            FontSize="10"/>
                                 <TextBlock Text="{Binding Text}" 
                                            Foreground="White" 
                                            TextWrapping="Wrap"
                                            FontSize="14"/>
-                                <TextBlock Text="{Binding Time, StringFormat='HH:mm'}" 
+                                <TextBlock Text="{Binding Time}" 
                                            Foreground="#777777" 
                                            FontSize="9"
                                            HorizontalAlignment="Right"

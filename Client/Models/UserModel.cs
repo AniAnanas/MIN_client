@@ -3,27 +3,29 @@ using System.ComponentModel;
 
 namespace Client.Models
 {
-    public class UserModel : INotifyPropertyChanged
+    public class UserModel : BaseModel
     {
         private int _id = default;
         private string _name = "null";
         private string _lastName = string.Empty;
         private string _username = string.Empty;
         private string? _avatar;
+        private bool _isOnline = false;
+        public bool itsMeTrustBro = false;
         public int Id
         {
             get => _id;
-            set { if (_id == value) return; _id = value; OnPropertyChanged(nameof(Id)); }
+            set { OnPropertyChanged(ref _id, value, nameof(Id)); }
         }
         public string Name
         {
             get => _name;
-            set { if (_name == value) return; _name = value; OnPropertyChanged(nameof(Name)); }
+            set { OnPropertyChanged(ref _name, value, nameof(Name)); }
         }
         public string LastName
         {
             get => _lastName;
-            set { if (_lastName == value) return; _lastName = value; OnPropertyChanged(nameof(LastName)); }
+            set { if (_lastName == value) return; _lastName = value; OnPropertyChanged(ref _lastName, value, nameof(LastName)); }
         }
         public string Fullname =>
             (string.IsNullOrWhiteSpace(LastName)
@@ -32,28 +34,26 @@ namespace Client.Models
         public string Username
         {
             get => _username;
-            set { if (_username == value) return; _username = value; OnPropertyChanged(nameof(Username)); }
+            set { if (_username == value) return; _username = value; OnPropertyChanged(ref _username, value, nameof(Username)); }
         }
         public string? Avatar
         {
             get => _avatar;
-            set { if (_avatar == value) return; _avatar = value; OnPropertyChanged(nameof(Avatar)); }
+            set { if (_avatar == value) return; _avatar = value; OnPropertyChanged(ref _avatar, value, nameof(Avatar)); }
+        }
+        public bool IsOnline
+        {
+            get => _isOnline;
+            set { OnPropertyChanged(ref _isOnline, value, nameof(IsOnline)); }
         }
 
-        public UserModel(int id, string username, string name = "", string lastName = "", string? avatar = "")
+        public UserModel(int id, string username, string name = "Null", string lastName = "", string? avatar = "")
         {
             Id = id;
             Username = username;
             Name = name;
             LastName = lastName;
             Avatar = avatar;
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

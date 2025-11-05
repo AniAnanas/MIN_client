@@ -68,7 +68,7 @@
             BorderThickness="2"
             CornerRadius="15"
             Margin="0,7">
-            <Controls:ChatUI/>
+            <Controls:ChatUI DataContext="{Binding ChatViewModel}"/>
         </Border>
 
         <Border x:Name="RightBorder"

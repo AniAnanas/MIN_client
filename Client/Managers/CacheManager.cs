@@ -21,7 +21,7 @@ namespace Client.Managers
                 Directory.CreateDirectory(_cacheDirectory);
             }
         }
-
+        
         public T? Get<T>(string key)
         {
             try
