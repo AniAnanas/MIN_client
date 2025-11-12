@@ -1,8 +1,4 @@
-﻿using Client.Services.Interfaces;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Data;
+﻿using Client.Shared.Interfaces;
 
 namespace Client
 {
@@ -40,24 +36,5 @@ namespace Client
         {
             _logger?.General(message);
         }
-    }
-
-    public static class StringExtensions
-    {
-        public static string Truncate(this string input, int maxLength)
-        {
-            if (string.IsNullOrEmpty(input) || maxLength < 1)
-            {
-                return string.Empty;
-            }
-
-            if (input.Length <= maxLength)
-            {
-                return input;
-            }
-
-            return input.Substring(0, maxLength - 3) + "...";
-        }
-
     }
 }

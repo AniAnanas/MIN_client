@@ -16,7 +16,10 @@ namespace Client.Controls
             InitializeComponent();
             // DataContext will be set by parent or binding
         }
-        private void MinimizeBtn_Click(object sender, RoutedEventArgs e) { }
+        private void MinimizeBtn_Click(object sender, RoutedEventArgs e) 
+        { 
+            
+        }
         private void MaximizeBtn_Click(object sender, RoutedEventArgs e) { }
         private void CloseBtn_Click(object sender, RoutedEventArgs e) { }
 
@@ -81,39 +84,6 @@ namespace Client.Controls
                     var window = Window.GetWindow(this);
                     window?.DragMove();
                 }
-            }
-        }
-
-        // Search functionality
-        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (ViewModel != null)
-            {
-                ViewModel.SearchText = (sender as TextBox)?.Text ?? string.Empty;
-            }
-        }
-
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel?.SearchCommand?.CanExecute(null) == true)
-            {
-                ViewModel.SearchCommand.Execute(null);
-            }
-        }
-
-        private void SettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel?.SettingsCommand?.CanExecute(null) == true)
-            {
-                ViewModel.SettingsCommand.Execute(null);
-            }
-        }
-
-        private void UserProfileButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel?.UserProfileCommand?.CanExecute(null) == true)
-            {
-                ViewModel.UserProfileCommand.Execute(null);
             }
         }
     }

@@ -19,7 +19,6 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            
             <Image Grid.Column="0" Source="/content/icon1.png" Margin="7,0,0,0"/>
 
             <TextBlock Grid.Column="1" Text="MIN" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontFamily="Times New Roman"/>

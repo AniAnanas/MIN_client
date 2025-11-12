@@ -1,100 +1,94 @@
-using Client.Services.Interfaces;
-using System;
-using System.Collections.Generic;
+using Client.Shared.Interfaces;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Client.Services
+namespace Client.Services;
+
+public class LoggingService : ILoggingService
 {
-    public class LoggingService : ILoggingService
+    private static readonly object _lock = new();
+    private readonly string _logPath;
+
+    public LoggingService()
     {
-        private static readonly object _lock = new();
-        private readonly string _logPath;
+        _logPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+        CreateFolder();
+    }
 
-        public LoggingService()
+    private void CreateFolder()
+    {
+        try
         {
-            _logPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
-            CreateFolder();
-        }
-
-        private void CreateFolder()
-        {
-            try
+            if (!Directory.Exists(_logPath))
             {
-                if (!Directory.Exists(_logPath))
-                {
-                    Directory.CreateDirectory(_logPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to create log directory: {ex.Message}");
+                Directory.CreateDirectory(_logPath);
             }
         }
-
-        private void LogToFile(string level, string message)
+        catch (Exception ex)
         {
-            try
+            Console.WriteLine($"Failed to create log directory: {ex.Message}");
+        }
+    }
+
+    private void LogToFile(string level, string message)
+    {
+        try
+        {
+            lock (_lock)
             {
-                lock (_lock)
-                {
-                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH:mm:ss");
-                    string lastBoot = DateTime.Now.ToString("yyyy-MM-dd");
-                    var stackTrace = new System.Diagnostics.StackTrace();
-                    var frame = stackTrace.GetFrame(2)?.GetMethod(); // Go up two frames to get the actual caller
-                    var methodName = frame?.Name ?? "Unknown";
-                    var className = frame?.ReflectedType?.Name ?? "Unknown";
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH:mm:ss");
+                string lastBoot = DateTime.Now.ToString("yyyy-MM-dd");
+                var stackTrace = new System.Diagnostics.StackTrace();
+                var frame = stackTrace.GetFrame(2)?.GetMethod(); // Go up two frames to get the actual caller
+                var methodName = frame?.Name ?? "Unknown";
+                var className = frame?.ReflectedType?.Name ?? "Unknown";
 
-                    string logMessage = $"{timestamp} [{level.ToUpper().First()}] ({className}.{methodName}) => {message}{Environment.NewLine}";
+                string logMessage = $"{timestamp} [{level.ToUpper().First()}] ({className}.{methodName}) => {message}{Environment.NewLine}";
 
-                    File.AppendAllText(Path.Combine(_logPath, $"{lastBoot}.log"), logMessage);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to write to log file: {ex.Message}");
+                File.AppendAllText(Path.Combine(_logPath, $"{lastBoot}.log"), logMessage);
             }
         }
-
-        private void LogToConsole(string level, string message, ConsoleColor color)
+        catch (Exception ex)
         {
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write($"[Log System] ");
-            Console.ForegroundColor = color;
-            Console.WriteLine(message);
-            Console.ResetColor();
+            Console.WriteLine($"Failed to write to log file: {ex.Message}");
         }
+    }
 
-        public void Info(string message)
-        {
-            LogToConsole("INFO", message, ConsoleColor.Cyan);
-            LogToFile("INFO", message);
-        }
+    private void LogToConsole(string level, string message, ConsoleColor color)
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.Write($"[Log System] ");
+        Console.ForegroundColor = color;
+        Console.WriteLine(message);
+        Console.ResetColor();
+    }
 
-        public void Error(string message)
-        {
-            LogToConsole("ERROR", message, ConsoleColor.Red);
-            LogToFile("ERROR", message);
-        }
+    public void Info(string message)
+    {
+        LogToConsole("INFO", message, ConsoleColor.Cyan);
+        LogToFile("INFO", message);
+    }
 
-        public void Warn(string message)
-        {
-            LogToConsole("WARN", message, ConsoleColor.Yellow);
-            LogToFile("WARN", message);
-        }
+    public void Error(string message)
+    {
+        LogToConsole("ERROR", message, ConsoleColor.Red);
+        LogToFile("ERROR", message);
+    }
 
-        public void Success(string message)
-        {
-            LogToConsole("SUCCESS", message, ConsoleColor.Green);
-            LogToFile("SUCCESS", message);
-        }
+    public void Warn(string message)
+    {
+        LogToConsole("WARN", message, ConsoleColor.Yellow);
+        LogToFile("WARN", message);
+    }
 
-        public void General(string message)
-        {
-            LogToConsole("GENERAL", message, ConsoleColor.White);
-            LogToFile("GENERAL", message);
-        }
+    public void Success(string message)
+    {
+        LogToConsole("SUCCESS", message, ConsoleColor.Green);
+        LogToFile("SUCCESS", message);
+    }
+
+    public void General(string message)
+    {
+        LogToConsole("GENERAL", message, ConsoleColor.White);
+        LogToFile("GENERAL", message);
     }
 }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Newtonsoft.Json;
+using CommunityToolkit.Mvvm;
 
 namespace Client
 {
@@ -13,6 +14,13 @@ namespace Client
     {
         [JsonProperty(nameof(LastLeftTabSize))]
         public short LastLeftTabSize { get; set; } = 280;
+
+        [JsonProperty("Path to Sqlite DB")]
+        public string DatabasePath { get; set; } = "Data/MIN.sqlite";
+
+        [JsonProperty("Interval of DB saving in secs")]
+        public int DBSaveInterval { get; set; } = 120;
+
         public static Config Read()
         {
             //string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "Settings");
