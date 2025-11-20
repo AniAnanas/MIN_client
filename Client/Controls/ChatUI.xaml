@@ -5,11 +5,49 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Client.Controls"
              xmlns:models="clr-namespace:Client.Models" 
-             xmlns:viewmodels="clr-namespaceшарп :Client.ViewModels"
+             xmlns:viewmodels="clr-namespace:Client.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Background="Transparent"
              d:Background="#FF1E1E1E">
+
+    <UserControl.Resources>
+        <local:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
+        <DataTemplate x:Key="IncomingMessageTemplate" DataType="{x:Type models:MessageModel}">
+            <Border Margin="6" Padding="8" CornerRadius="12" Background="#2B2B2B" MaxWidth="480" HorizontalAlignment="Left">
+                <StackPanel>
+                    <TextBlock Text="{Binding User}" Foreground="#AAAAAA" FontSize="10"
+                           Visibility="{Binding User, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                    <TextBlock Text="{Binding Text}" Foreground="White" TextWrapping="Wrap" FontSize="14" Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding Time, StringFormat={}{0:HH:mm}}" Foreground="#777777" FontSize="9" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="OutgoingMessageTemplate" DataType="{x:Type models:MessageModel}">
+            <Border Margin="6" Padding="8" CornerRadius="12" Background="#005A9E" MaxWidth="480" HorizontalAlignment="Right">
+                <StackPanel>
+                    <TextBlock Text="{Binding Text}" Foreground="White" TextWrapping="Wrap" FontSize="14"/>
+                    <TextBlock Text="{Binding Time, StringFormat={}{0:HH:mm}}" Foreground="#DDEEFF" FontSize="9" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="MessageSelectorTemplate" DataType="{x:Type models:MessageModel}">
+            <ContentControl Content="{Binding}">
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Setter Property="ContentTemplate" Value="{StaticResource IncomingMessageTemplate}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsMine}" Value="True">
+                                <Setter Property="ContentTemplate" Value="{StaticResource OutgoingMessageTemplate}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+        </DataTemplate>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -17,84 +55,52 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Сообщения -->
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Focusable="False">
-            <ItemsControl ItemsSource="{Binding Messages}" DataContext="{}" Focusable="False">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel
-                            VirtualizingPanel.IsVirtualizing="True"
-                            VirtualizingPanel.VirtualizationMode="Recycling"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type models:MessageModel}">
-                        <Border Margin="0,4" 
-                                CornerRadius="12" 
-                                MaxWidth="400">
-                            <StackPanel Margin="12,8">
-                                <TextBlock Text="{Binding User}" 
-                                           Foreground="#AAAAAA" 
-                                           FontSize="10"/>
-                                <TextBlock Text="{Binding Text}" 
-                                           Foreground="White" 
-                                           TextWrapping="Wrap"
-                                           FontSize="14"/>
-                                <TextBlock Text="{Binding Time}" 
-                                           Foreground="#777777" 
-                                           FontSize="9"
-                                           HorizontalAlignment="Right"
-                                           Margin="0,4,0,0"/>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-
+        <!-- Сообщения с авто-скроллом -->
+        <Border Grid.Row="0" Margin="12" Background="Transparent">
+            <ScrollViewer x:Name="MessagesScrollViewer" VerticalScrollBarVisibility="Auto" Focusable="False">
+                <ItemsControl x:Name="MessagesItemsControl" ItemsSource="{Binding Messages}" ItemTemplate="{StaticResource MessageSelectorTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True"
+                                               VirtualizingPanel.VirtualizationMode="Recycling"
+                                               ScrollUnit="Pixel"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+        
         <!-- Панель ввода сообщения -->
-        <Border Grid.Row="1" 
-                Background="#4C000000"
-                Padding="10"
-                Margin="12"
-                CornerRadius="16">
+        <Border Grid.Row="1" Background="#4C000000" Padding="5" Margin="12" CornerRadius="16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                
-                <Image Grid.Column="0" Source="/Content/Skrepka.png" Width="Auto" Height="20" HorizontalAlignment="Left" Margin="5,0,5,0" />
 
-                <TextBox Grid.Column="1" Text="Сообщение..." Name="Input_Area"
-                         Foreground="White" FontSize="9" VerticalAlignment="Center">
-                    <!-- TextChanged="TextBox_TextChanged" KeyDown="TextBox_KeyDown"
-                    TextChanged для отправки is typing...;  KeyDown для отправки/новой строки -->
-                    
-                    <TextBox.Style>
-                        <Style TargetType="TextBox">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsFocused" Value="True">
-                                    <Setter Property="BorderBrush" Value="Black"/>
-                                    <Setter Property="BorderThickness" Value="1"/>
-                                    <Setter Property="Text" Value=""/>
-                                </Trigger>
-                                <Trigger Property="IsFocused" Value="False">
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Text" Value=""/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>
-                </TextBox>
+                <Button Grid.Column="0" Width="32" Height="32" Background="Transparent" BorderBrush="Transparent" Click="AttachButton_Click">
+                    <Image Source="/Content/Skrepka.png" Width="18" Height="18"/>
+                </Button>
 
-                <Button Grid.Column="2" Width="20" Height="20" 
-                        HorizontalAlignment="Right" Margin="5,0,5,0" 
-                        Background="Transparent" BorderBrush="Transparent">
-                    <Image Source="/Content/SendArrow.png"/>
+                <Grid Grid.Column="1">
+                    <TextBox x:Name="Input_Area"
+                         Text="{Binding MessageText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Foreground="White" FontSize="13" VerticalAlignment="Center"
+                         Background="Transparent" BorderThickness="0"
+                         CaretBrush="#777777"
+                         AcceptsReturn="True" TextWrapping="Wrap"
+                         KeyDown="MessageTextBox_KeyDown"
+                         TextChanged="MessageTextBox_TextChanged"
+                         VerticalScrollBarVisibility="Auto"
+                         Padding="6,4"/>
+                    <TextBlock Text="Сообщение..." Foreground="#777777" FontSize="13" VerticalAlignment="Center" Margin="8,0,0,0"
+                           IsHitTestVisible="False"
+                           Visibility="{Binding Text, ElementName=Input_Area, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                </Grid>
+
+                <Button Grid.Column="2" Width="36" Height="36" HorizontalAlignment="Right" Background="Transparent" BorderBrush="Transparent" Click="SendButton_Click">
+                    <Image Source="/Content/SendArrow.png" Width="18" Height="18"/>
                 </Button>
             </Grid>
         </Border>

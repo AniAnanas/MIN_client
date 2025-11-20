@@ -18,10 +18,24 @@ namespace Client.Controls
         }
         private void MinimizeBtn_Click(object sender, RoutedEventArgs e) 
         { 
-            
+            var window = Window.GetWindow(this);
+            if(window != null) window.WindowState = WindowState.Minimized;
         }
-        private void MaximizeBtn_Click(object sender, RoutedEventArgs e) { }
-        private void CloseBtn_Click(object sender, RoutedEventArgs e) { }
+        private void MaximizeBtn_Click(object sender, RoutedEventArgs e) 
+        {
+            var window = Window.GetWindow(this);
+            if (window == null) return;
+
+            window.WindowState = window.WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
+        }
+        private void CloseBtn_Click(object sender, RoutedEventArgs e) 
+        {
+            var window = Window.GetWindow(this);
+            if (window != null) window.Close();
+            else Application.Current.Shutdown();
+        }
 
         // Dependency property for TopBarViewModel
         public TopBarViewModel ViewModel

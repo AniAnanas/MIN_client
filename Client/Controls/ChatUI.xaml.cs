@@ -1,8 +1,11 @@
-﻿using Client.ViewModels;
+﻿using Client.Net;
+using Client.ViewModels;
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Client.Controls
@@ -72,26 +75,11 @@ namespace Client.Controls
         {
             if (e.Handled) return;
 
-            if (e.Key == Key.Enter)
+ 
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift)
-                {
-                    // Insert new line
-                    var textBox = sender as TextBox;
-                    if (textBox != null)
-                    {
-                        var caretIndex = textBox.CaretIndex;
-                        textBox.Text = textBox.Text.Insert(caretIndex, Environment.NewLine);
-                        textBox.CaretIndex = caretIndex + Environment.NewLine.Length;
-                    }
-                    e.Handled = true;
-                }
-                else if (!string.IsNullOrWhiteSpace(MessageText))
-                {
-                    // Send message
-                    SendMessage();
-                    e.Handled = true;
-                }
+                e.Handled = true;
+                SendMessage();
             }
         }
 
@@ -102,6 +90,7 @@ namespace Client.Controls
                 // TODO: Implement message sending through ViewModel
                 Log.Info($"Sending message: {MessageText}");
                 MessageText = string.Empty;
+                
             }
         }
 
@@ -120,10 +109,7 @@ namespace Client.Controls
         }
 
         // Send button click
-        private void SendButton_Click(object sender, RoutedEventArgs e)
-        {
-            SendMessage();
-        }
+        private void SendButton_Click(object sender, RoutedEventArgs e) => SendMessage();
 
         // Attach file button
         private void AttachButton_Click(object sender, RoutedEventArgs e)
@@ -139,4 +125,17 @@ namespace Client.Controls
             Log.Info("Emoji picker clicked");
         }
     }
+    public class StringNullOrEmptyToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return string.IsNullOrEmpty(value as string) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException(); 
+        }
+    }
+
 }

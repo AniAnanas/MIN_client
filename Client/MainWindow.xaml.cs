@@ -28,10 +28,7 @@ namespace Client
 
         public void OnPostInitialize(object? sender, EventArgs e)
         {
-            // Post-initialization logic can be added here
         }
 
-        // Window events are now handled by ViewModel commands
-        // No need for manual event handlers - everything is bound in XAML
     }
 }
