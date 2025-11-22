@@ -16,7 +16,7 @@ namespace Client.ViewModels
             _chat.PropertyChanged += ChatOnPropertyChanged;
         }
 
-        public int Id => _chat.Id;
+        public long Id => _chat.Id;
         public string Title
         {
             get => _chat.User.Fullname;

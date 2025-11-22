@@ -28,7 +28,7 @@ namespace Client.ViewModels
             _chat.PropertyChanged += ChatOnPropertyChanged;
         }
 
-        public int Id { get; private set; } = default;
+        public long Id { get; private set; } = default;
 
         private string _title = string.Empty;
         public string Title

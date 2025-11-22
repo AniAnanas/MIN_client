@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text;
@@ -12,142 +15,424 @@ public class NetworkService : INetworkService
 {
     private TcpClient _client;
     private NetworkStream _stream;
-    private StreamReader _reader;
-    private StreamWriter _writer;
 
-    public event Action<MessageModel> MessageRecieved;
-    public event Action<string[]> UsersRecieved;
+    private CancellationTokenSource _cts;
+    private bool _isConnected;
+
+    
     public event Action<MessageModel> MessageReceived;
-    public event Action<string[]> UsersReceived;
+    public event Action<UserModel[]> UsersReceived;
+    public event Action<(long userId, bool isOnline)> UserStatusChanged;
 
-    public bool recievingHistory = false;
+    private TaskCompletionSource<long> _loginTcs;
+    private TaskCompletionSource<(long userId, string token)> _tokenTcs;
+    private TaskCompletionSource<long> _sendedMsgTcs;
+    private TaskCompletionSource<UserModel[]> _getUsersTcs;
+    private TaskCompletionSource<MessageModel[]> _historyTcs;
+    private TaskCompletionSource<UserModel[]> _searchTcs;
+
+    class PingInfo
+    {
+        public DateTime LastSentAt { get; set; }
+        public DateTime LastPongAt { get; set; }
+        public double LastPingMs => (LastPongAt - LastSentAt).TotalMilliseconds;
+    }
+
+    private PingInfo _pingInfo;
+    public double PingToServerMs => _pingInfo?.LastPingMs ?? -1;
 
     public async Task<bool> ConnectAsync(string host, int port)
     {
-        _client = new();
-        await _client.ConnectAsync(host, port);
-        _stream = _client.GetStream();
-        _reader = new StreamReader(_stream, Encoding.UTF8);
-        _writer = new StreamWriter(_stream, Encoding.UTF8) { AutoFlush = true };
-        _ = Task.Run(RecieveLoop);
-        return true;
-    }
-
-    public async Task<string> LoginAsync(string username, string password)
-    {
-        await _writer.WriteLineAsync($"[LOGIN]{username};{password}");
-        string resp = await ReadResponse("[TOKEN]");
-
-        return resp;
-    }
-
-    public async Task<string> RegisterAsync(string username, string password)
-    {
-        await _writer.WriteLineAsync($"[REG]{username};{password}");
-        return await ReadResponse("[TOKEN]");
-    }
-
-    public async Task<bool> AuthorizeAsync(string token)
-    {
-        await _writer.WriteLineAsync($"[AUTH]{token}");
         try
         {
-            string resp = await ReadResponse("[OK]");
-            if (resp != "AUTH")
-            {
-                return false;
-            }
+            _client = new TcpClient();
+            await _client.ConnectAsync(host, port);
+            _stream = _client.GetStream();
+            _isConnected = true;
+            _cts = new CancellationTokenSource();
+
+            // Запускаем цикл чтения
+            _ = Task.Run(() => ReceiveLoop(_cts.Token));
+            
+            _pingInfo = new PingInfo();
+            await PingAsync();
+
+            Log.Info($"Connected to {host}:{port}, ping: {PingToServerMs}ms");
+            return true;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            if (e.Message.Contains("invalid_token"))
-            {
-                return false;
-            }
+            Log.Error($"Connection failed: {ex.Message}");
+            return false;
         }
-        return true;
     }
 
-    public async Task<bool> SendMessageAsync(string sender, string recipient, string body)
+    public async Task LogoutAsync()
     {
-        await _writer.WriteLineAsync($"[MSG]{sender}>{recipient}:{body}");
-        return true;
+        var packet = PacketBuilder.Create(PacketType.LogoutRequest);
+        await SendDataAsync(packet);
     }
 
-    public async Task<string[]> GetUsersAsync()
+    public async Task<(long userId, string token)> RegisterAsync(string username, string password)
     {
-        throw new NotImplementedException("Server doesn't supports manual getting users, try LoginAsync, RegisterAsync, AuthorizeAsync");
-    }
+        _tokenTcs = new TaskCompletionSource<(long userId, string token)>();
 
-    private async Task RecieveLoop()
-    {
-        string line;
-        while ((line = await _reader.ReadLineAsync()) != null)
+        var packet = PacketBuilder.Create(PacketType.RegisterRequest, bw =>
         {
-            if (line.StartsWith("[MSG]"))
-            {
-                var msg = ParseMsg(line[5..]);
-                if (msg != null) MessageRecieved?.Invoke(msg);
-            }
-            else if (line.StartsWith("[USERS]"))
-            {
-                var users = line[7..].Split(';', StringSplitOptions.RemoveEmptyEntries);
-                UsersRecieved?.Invoke(users);
-            }
-            else if (line.StartsWith("[HIST]BEGIN"))
-            {
-                recievingHistory = true;
-            }
-            else if (line.StartsWith("[HIST]END"))
-            {
-                recievingHistory = false;
-            }
-            else
-            {
+            bw.WriteString(username);
+            bw.WriteString(password);
+        });
 
-            }
-        }
-    }
+        await SendDataAsync(packet);
 
-    private static MessageModel? ParseMsg(string line) 
-    {
-        // sender>recipient:body
-
-        int firstSplit = line.IndexOf('>');
-        int secondSplit = line.IndexOf(':');
-
-        if (firstSplit < 0 || secondSplit < 0) return null;
-
-        string sender = line[..firstSplit];
-        string recipient = line.Substring(firstSplit + 1, secondSplit - firstSplit - 1);
-        string body = line[(secondSplit + 1)..];
-
-        return new MessageModel(0, body, DateTime.Now, new UserModel(0, sender));
-    }
-    private async Task<string> ReadResponse(string marker)
-    {
-        string? line;
-        while ((line = await _reader.ReadLineAsync()) != null)
+        var task = _tokenTcs.Task;
+        if (await Task.WhenAny(task, Task.Delay(5000)) == task)
         {
-            if (line.StartsWith(marker))
+            return await task;
+        }
+
+        _tokenTcs.TrySetCanceled();
+        throw new TimeoutException("Registration timed out");
+    }
+
+    public async Task<(long userId, string token)> LoginAsync(string username, string password)
+    {
+        _tokenTcs = new TaskCompletionSource<(long userId, string token)>();
+
+        var packet = PacketBuilder.Create(PacketType.LoginRequest, bw =>
+        {
+            bw.WriteString(username);
+            bw.WriteString(password);
+        });
+
+        await SendDataAsync(packet);
+
+        // Ждем ответа или таймаута
+        var task = _tokenTcs.Task;
+        if (await Task.WhenAny(task, Task.Delay(5000)) == task)
+        {
+            return await task;
+        }
+
+        _tokenTcs.TrySetCanceled();
+        throw new TimeoutException("Login timed out");
+    }
+
+    public async Task<long> AuthorizeAsync(string token)
+    {
+        _loginTcs = new TaskCompletionSource<long>();
+
+        var packet = PacketBuilder.Create(PacketType.AuthTokenRequest, bw =>
+        {
+            bw.WriteString(token);
+        });
+
+        await SendDataAsync(packet);
+
+        var task = _loginTcs.Task;
+        if (await Task.WhenAny(task, Task.Delay(5000)) == task)
+        {
+            return await task;
+        }
+        return -1;
+    }
+
+    public async Task<long> SendMessageAsync(long recipientId, string text)
+    {
+        _sendedMsgTcs = new();
+
+        var packet = PacketBuilder.Create(PacketType.SendMessage, bw =>
+        {
+            bw.Write(recipientId);
+            bw.WriteString(text);
+        });
+
+        await SendDataAsync(packet);
+
+        var task = _loginTcs.Task;
+        if (await Task.WhenAny(task, Task.Delay(5000)) == task)
+        {
+            return await task;
+        }
+
+        return default;
+    }
+
+    public async Task<MessageModel[]> GetHistoryAsync(long userId)
+    {
+        _historyTcs = new();
+
+        // user должен быть ID
+        var packet = PacketBuilder.Create(PacketType.HistoryRequest, bw =>
+        {
+            bw.Write(userId); // User ID
+            bw.Write((uint)50); // лимит сообщений
+        });
+
+        await SendDataAsync(packet);
+
+        var task = _historyTcs.Task;
+        if (await Task.WhenAny(task, Task.Delay(5000)) == task)
+        {
+            return await task;
+        }
+
+        return [];
+    }
+
+    public async Task<UserModel[]> GetUserListAsync()
+    {
+        _getUsersTcs = new();
+
+        var packet = PacketBuilder.Create(PacketType.UserListRequest);
+        
+        await SendDataAsync(packet);
+
+        var task = _getUsersTcs.Task;
+        if (await Task.WhenAny(task, Task.Delay(5000)) == task)
+        {
+            return await task;
+        }
+
+        return [];
+    }
+
+    public async Task PingAsync()
+    {
+        var packet = PacketBuilder.Create(PacketType.Ping);
+        _pingInfo.LastSentAt = DateTime.Now;
+        await SendDataAsync(packet);
+    }
+
+    public async Task<UserModel[]> SearchUsersAsync(string query)
+    {
+        _searchTcs = new();
+
+        var packet = PacketBuilder.Create(PacketType.SearchUsersRequest, bw =>
+        {
+            bw.WriteString(query);
+        });
+
+        await SendDataAsync(packet);
+
+        var task = _searchTcs.Task;
+        if (await Task.WhenAny(task, Task.Delay(5000)) == task)
+        {
+            return await task;
+        }
+
+        return [];
+    }
+
+    private async Task SendDataAsync(byte[] data)
+    {
+        if (!_isConnected) return;
+        try
+        {
+            await _stream.WriteAsync(data);
+            await _stream.FlushAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Send error: {ex.Message}");
+            _isConnected = false;
+        }
+    }
+
+    private async Task ReceiveLoop(CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested && _isConnected)
             {
-                return line[marker.Length..];
-            }
-            else if (line.StartsWith("[ERR]"))
-            {
-                throw new Exception(line[5..]);
+                // читаем длину пакета (4 байта)
+                byte[] lengthBuffer = new byte[4];
+                int bytesRead = await ReadExactAsync(lengthBuffer, 4, token);
+                if (bytesRead == 0) break; // Disconnected
+
+                int packetLength = BitConverter.ToInt32(lengthBuffer, 0);
+
+                // остальное тело пакета + его ID
+                int bodyLength = packetLength - 4;
+                if (bodyLength < 2) throw new Exception("Invalid packet size"); //2 байта для ID
+
+                byte[] bodyBuffer = new byte[bodyLength];
+                if (await ReadExactAsync(bodyBuffer, bodyLength, token) != bodyLength) break;
+
+                // парсим пакет
+                using MemoryStream ms = new(bodyBuffer);
+                using BinaryReader br = new(ms);
+                ProcessPacket(br);
             }
         }
-        return "";
+        catch (Exception ex)
+        {
+            Log.Error($"Receive loop error: {ex.Message}");
+        }
+        finally
+        {
+            _isConnected = false;
+            _client?.Close();
+            Log.Info("Disconnected");
+        }
     }
 
-    public Task<string[]> GetPeersAsync()
+    private async Task<int> ReadExactAsync(byte[] buffer, int count, CancellationToken token)
     {
-        throw new NotImplementedException();
+        int totalRead = 0;
+        while (totalRead < count)
+        {
+            int read = await _stream.ReadAsync(buffer, totalRead, count - totalRead, token);
+            if (read == 0) return 0;
+            totalRead += read;
+        }
+        return totalRead;
     }
 
-    public Task<MessageModel[]> GetHistoryAsync(string user, int id, int count, bool upper = false)
+    private void ProcessPacket(BinaryReader br)
     {
-        throw new NotImplementedException();
+        // читаем ID (2 байта)
+        ushort packetIdRaw = br.ReadUInt16();
+        PacketType type = (PacketType)packetIdRaw;
+
+        switch (type)
+        {
+            case PacketType.PacketError:
+                {
+                    ushort errorCode = br.ReadUInt16();
+                    string errorMsg = br.ReadEncodedString();
+                    Log.Error($"Server Error [{errorCode}]: {errorMsg}");
+
+                    // если мы ждали чето, отменяем ожидание
+                    _tokenTcs?.TrySetException(new Exception(errorMsg));
+                    _loginTcs?.TrySetException(new Exception(errorMsg));
+                    _sendedMsgTcs?.TrySetException(new Exception(errorMsg));
+                    _getUsersTcs?.TrySetException(new Exception(errorMsg));
+                    _historyTcs?.TrySetException(new Exception(errorMsg));
+                    _searchTcs?.TrySetException(new Exception(errorMsg));
+                    break;
+                }
+            case PacketType.RegisterResponse:
+                {
+                    bool success = br.ReadByte() != 0;
+                    long UserId = br.ReadInt64();
+                    string Token = br.ReadEncodedString();
+
+                    if (success) _tokenTcs?.TrySetResult((UserId, Token));
+                    else _tokenTcs?.TrySetException(new Exception("Registration failed"));
+                    break;
+                }
+            case PacketType.LoginResponse:
+                {
+                    bool success = br.ReadByte() != 0;
+                    long UserId = br.ReadInt64();
+                    string Token = br.ReadEncodedString();
+
+                    if (success) _tokenTcs?.TrySetResult((UserId, Token));
+                    else _tokenTcs?.TrySetException(new Exception("Login failed"));
+                    break;
+                }
+            case PacketType.AuthResponse:
+                {
+                    bool success = br.ReadByte() != 0;
+                    long UserId = br.ReadInt64();
+                    if (success) _loginTcs?.TrySetResult(UserId);
+                    else _loginTcs?.TrySetException(new Exception("Auth failed"));
+                    break;
+                }
+            case PacketType.ReceiveMessage:
+                {
+                    long msgId = br.ReadInt64();
+                    long timestamp = br.ReadInt64();
+                    long senderId = br.ReadInt64();
+                    long recipientId = br.ReadInt64();
+                    string body = br.ReadEncodedString();
+
+                    var msgModel = new MessageModel(
+                        msgId,
+                        body,
+                        DateTimeOffset.FromUnixTimeSeconds(timestamp).LocalDateTime,
+                        new UserModel(senderId, senderId.ToString()) // Пока имя неизвестно
+                    );
+
+                    MessageReceived?.Invoke(msgModel);
+                    break;
+                }
+            case PacketType.HistoryResponse:
+                {
+                    uint msgCount = br.ReadUInt32();
+                    var messages = new List<MessageModel>();
+                    for (int i = 0; i < msgCount; i++)
+                    {
+                        long msgId = br.ReadInt64();
+                        long timestamp = br.ReadInt64();
+                        long senderId = br.ReadInt64();
+                        /*long recipientId*/ _ = br.ReadInt64();
+                        string text = br.ReadEncodedString();
+                        var hMsgModel = new MessageModel(
+                            msgId,
+                            text,
+                            DateTimeOffset.FromUnixTimeSeconds(timestamp).LocalDateTime,
+                            new UserModel(senderId, senderId.ToString()) // Пока имя неизвестно
+                        );
+                        messages.Add(hMsgModel);
+                    }
+
+                    _historyTcs?.SetResult([.. messages]);
+
+                    break;
+                }
+            case PacketType.UserListResponse:
+                {
+                    uint count = br.ReadUInt32();
+                    var users = new List<UserModel>();
+                    for (int i = 0; i < count; i++)
+                    {
+                        long userId = br.ReadInt64();
+                        string username = br.ReadEncodedString();
+                        bool status = br.ReadByte() != 0;
+
+                        var userModel = new UserModel(userId, username, username) { IsOnline = status };
+                        users.Add(userModel);
+                    }
+
+                    _getUsersTcs?.SetResult([.. users]);
+
+                    break;
+                }
+            case PacketType.Pong:
+                {
+                    _pingInfo.LastPongAt = DateTime.Now;
+                    Log.Info("Get PONG (0x000F): ping - {0}ms".SFormat(PingToServerMs));
+                    break;
+                }
+
+            case PacketType.SearchUsersResponse:
+                {
+                    ushort count = br.ReadUInt16();
+                    var results = new List<UserModel>();
+                    for (int i = 0; i < count; i++)
+                    {
+                        long userId = br.ReadInt64();
+                        string username = br.ReadEncodedString();
+                        bool isOnline = br.ReadByte() != 0;
+                        results.Add(new UserModel(userId, username, username) { IsOnline = isOnline });
+                    }
+
+                    _searchTcs?.SetResult([.. results]);
+
+                    break;
+                }
+            case PacketType.UserStatusUpdate:
+                {
+                    long userId = br.ReadInt64();
+                    bool isOnline = br.ReadByte() != 0;
+                    UserStatusChanged?.Invoke((userId, isOnline));
+                    break;
+                }
+            case PacketType.Ping:
+                _ = SendDataAsync(PacketBuilder.Create(PacketType.Pong));
+                break;
+        }
     }
 }

@@ -11,13 +11,13 @@ namespace Client.Models
 {
     public class ChatModel : BaseModel
     {
-        private int _id = default;
+        private long _id = default;
         private UserModel _user = new(0, "None", "None");
         private ObservableCollection<MessageModel> _messages;
         private int _unreadCount;
         //private ChatType _type;
 
-        public int Id
+        public long Id
         {
             get => _id;
             set { OnPropertyChanged(ref _id, value, nameof(Id)); }

@@ -14,7 +14,7 @@ namespace Client.ViewModels
             _message.PropertyChanged += Message_PropertyChanged;
         }
 
-        public int Id => _message.Id;
+        public long Id => _message.Id;
         public string Text => _message.Text;
         public UserModel User => _message.User;
         public bool IsOwn => _message.IsOwn;
@@ -28,7 +28,7 @@ namespace Client.ViewModels
 
         public bool ShowAvatar => !IsOwn;
 
-        public bool ShowTime => true; // Can be customized based on grouping logic
+        public static bool ShowTime => true; // Can be customized based on grouping logic
 
         private void Message_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {

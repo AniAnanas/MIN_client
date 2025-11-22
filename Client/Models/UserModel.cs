@@ -5,14 +5,14 @@ namespace Client.Models
 {
     public class UserModel : BaseModel
     {
-        private int _id = default;
+        private long _id = default;
         private string _name = "null";
         private string _lastName = string.Empty;
         private string _username = string.Empty;
         private string? _avatar;
         private bool _isOnline = false;
         public bool itsMeTrustBro = false;
-        public int Id
+        public long Id
         {
             get => _id;
             set { OnPropertyChanged(ref _id, value, nameof(Id)); }
@@ -47,7 +47,7 @@ namespace Client.Models
             set { OnPropertyChanged(ref _isOnline, value, nameof(IsOnline)); }
         }
 
-        public UserModel(int id, string username, string name = "Null", string lastName = "", string? avatar = "")
+        public UserModel(long id, string username, string name = "Null", string lastName = "", string? avatar = "")
         {
             Id = id;
             Username = username;

@@ -3,23 +3,14 @@ using System.ComponentModel;
 
 namespace Client.Models
 {
-    public class MessageModel : BaseModel
+    public class MessageModel(long id, string text, DateTime time, UserModel user) : BaseModel
     {
-        public MessageModel(int id, string text, DateTime time, UserModel user) 
-        {
-            _id = id;
-            _text = text;
-            _timestamp = time;
-            _sender = user;
-            _isOwn = user.itsMeTrustBro;
-        }
-        
-        private int _id = default;
-        private string _text = string.Empty;
-        private DateTime _timestamp = DateTime.UnixEpoch;
-        private UserModel _sender = new(0, "null");
-        private bool _isOwn;
-        public int Id
+        private long _id = id;
+        private string _text = text;
+        private DateTime _timestamp = time;
+        private UserModel _sender = user;
+        private readonly bool _isOwn = user.itsMeTrustBro;
+        public long Id
         {
             get => _id;
             set { OnPropertyChanged(ref _id, value, nameof(Id)); }

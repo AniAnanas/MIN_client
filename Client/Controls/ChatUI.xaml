@@ -39,7 +39,7 @@
                     <Style TargetType="ContentControl">
                         <Setter Property="ContentTemplate" Value="{StaticResource IncomingMessageTemplate}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsMine}" Value="True">
+                            <DataTrigger Binding="{Binding IsOwn}" Value="True">
                                 <Setter Property="ContentTemplate" Value="{StaticResource OutgoingMessageTemplate}"/>
                             </DataTrigger>
                         </Style.Triggers>
@@ -85,15 +85,15 @@
 
                 <Grid Grid.Column="1">
                     <TextBox x:Name="Input_Area"
-                         Text="{Binding MessageText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Foreground="White" FontSize="13" VerticalAlignment="Center"
-                         Background="Transparent" BorderThickness="0"
-                         CaretBrush="#777777"
-                         AcceptsReturn="True" TextWrapping="Wrap"
-                         KeyDown="MessageTextBox_KeyDown"
-                         TextChanged="MessageTextBox_TextChanged"
-                         VerticalScrollBarVisibility="Auto"
-                         Padding="6,4"/>
+               Text="{Binding MessageText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+         Foreground="White" FontSize="13" VerticalAlignment="Center"
+        Background="Transparent" BorderThickness="0"
+          CaretBrush="#777777"
+AcceptsReturn="True" TextWrapping="Wrap"
+ KeyDown="MessageTextBox_KeyDown"
+             TextChanged="MessageTextBox_TextChanged"
+            VerticalScrollBarVisibility="Auto"
+     Padding="6,4"/>
                     <TextBlock Text="Сообщение..." Foreground="#777777" FontSize="13" VerticalAlignment="Center" Margin="8,0,0,0"
                            IsHitTestVisible="False"
                            Visibility="{Binding Text, ElementName=Input_Area, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
