@@ -21,6 +21,12 @@ namespace Client
         [JsonProperty("Interval of DB saving in secs")]
         public int DBSaveInterval { get; set; } = 120;
 
+        [JsonProperty("Server Host")]
+        public string ServerHost { get; set; } = "localhost";
+
+        [JsonProperty("Server Port")]
+        public int ServerPort { get; set; } = 5555;
+
         public static Config Read()
         {
             //string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "Settings");

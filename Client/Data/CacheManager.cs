@@ -262,7 +262,7 @@ namespace Client.Data
                     foreach (var row in result)
                     {
                         string key = row["Key"].ToString();
-                        object value = t.IsPrimitiveOrString() ? Convert.ChangeType(row["Value"], t) : JsonConvert.DeserializeObject(row["Value"], t);
+                        object value = t.IsPrimitiveOrString() ? Convert.ChangeType(row["Value"], t) : JsonConvert.DeserializeObject((string)row["Value"], t);
                         GetOrCreateCache()[key] = value;
                     }
 
