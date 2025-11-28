@@ -1,27 +1,34 @@
-﻿using Client.Net;
+﻿using Client.Data;
+using Client.Net;
+using Client.Shared.Interfaces;
 using System.IO;
 using System.Windows;
 
-namespace Client.Controls
+namespace Client
 {
     /// <summary>
     /// Interaction logic for LoginWindow.xaml
     /// </summary>
     public partial class LoginWindow : Window
     {
-        private readonly NetworkService _net;
+        private readonly INetworkService _net;
+        private readonly DatabaseService _db;
 
-        public LoginWindow(NetworkService net)
+
+        public LoginWindow()
         {
             InitializeComponent();
-            _net = net ?? throw new ArgumentNullException(nameof(net));
-        }
 
+            _net = App.Current.Resources["Net"] as INetworkService
+                    ?? throw new NullReferenceException("App.Current.Resources[\"Net\"]");
+            _db = App.Current.Resources["Database"] as DatabaseService
+                    ?? throw new NullReferenceException("App.Current.Resources[\"Database\"]");
+            string username = _db.GetSetting("CurrentUsername") ?? string.Empty;
+            TbLogin.Text = username;
+        }
         private void SaveToken(string token)
         {
-            var dir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "MyApp");
+            var dir = Path.Combine(Environment.CurrentDirectory, "Data");
             Directory.CreateDirectory(dir);
             File.WriteAllText(Path.Combine(dir, "token.txt"), token);
         }
@@ -39,6 +46,7 @@ namespace Client.Controls
         private async Task PerformAuthAsync(bool isRegister)
         {
             TbError.Visibility = Visibility.Collapsed;
+
             string login = TbLogin.Text.Trim();
             string password = PbPassword.Password;
 
@@ -50,22 +58,38 @@ namespace Client.Controls
 
             try
             {
-                (long userId, string token) result;
-                if (isRegister)
-                    result = await _net.RegisterAsync(login, password);
-                else
-                    result = await _net.LoginAsync(login, password);
+                BtnLogin.IsEnabled = false;
+                BtnRegister.IsEnabled = false;
 
+                (long userId, string token) result;
+
+                if (isRegister)
+                {
+                    Log.Info($"Registering user: {login}");
+                    result = await _net.RegisterAsync(login, password);
+                    Log.Success($"Registration successful, userId: {result.userId}");
+                }
+                else
+                {
+                    Log.Info($"Logging in user: {login}");
+                    result = await _net.LoginAsync(login, password);
+                    Log.Success($"Login successful, userId: {result.userId}");
+                }
+
+                _db.SaveSetting("CurrentUsername", login);
                 SaveToken(result.token);
 
-                var main = new MainWindow(_net, result.userId);
+                var main = new MainWindow(result.userId);
                 main.Show();
 
                 Close();
             }
             catch (Exception ex)
             {
+                Log.Error($"Authentication failed: {ex.Message}");
                 ShowError(ex.Message);
+                BtnLogin.IsEnabled = true;
+                BtnRegister.IsEnabled = true;
             }
         }
 

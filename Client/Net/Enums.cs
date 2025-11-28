@@ -20,7 +20,8 @@
         SearchUsersRequest = 0x0010,
         SearchUsersResponse = 0x0011,
         LogoutRequest = 0x0012,
-        UserStatusUpdate = 0x0013
+        UserStatusUpdate = 0x0013,
+        SendMessageResponse = 0x0014
     }
 
     public enum ErrorCode : ushort

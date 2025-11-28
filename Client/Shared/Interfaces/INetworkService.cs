@@ -25,12 +25,15 @@ public interface INetworkService
     Task<(long userId, string token)> LoginAsync(string username, string password);
     Task<(long userId, string token)> RegisterAsync(string username, string password);
     Task<long> SendMessageAsync(long recipient, string text);
-    Task<MessageModel[]> GetHistoryAsync(long userId);
+    Task<MessageModel[]> GetHistoryAsync(long userId, int limit = 50);
     Task<UserModel[]> GetUserListAsync();
     Task PingAsync();
     Task<UserModel[]> SearchUsersAsync(string query);
-    Task LogoutAsync();
+    Task Disconnect(bool sendPacket = false);
+
+    long CurrentUserId { get; }
 
     event Action<MessageModel> MessageReceived;
+    event Action<UserModel[]> UsersReceived;
     event Action<(long userId, bool isOnline)> UserStatusChanged;
 }

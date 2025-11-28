@@ -17,9 +17,9 @@ namespace Client.ViewModels
         public string WindowTitle => _windowViewModel.Title;
         public WindowState CurrentWindowState => _windowViewModel.WindowState;
 
-        public ICommand MinimizeCommand => _windowViewModel.MinimizeCommand;
-        public ICommand MaximizeCommand => _windowViewModel.MaximizeCommand;
-        public ICommand CloseCommand => _windowViewModel.CloseCommand;
+        //public ICommand MinimizeCommand => _windowViewModel.MinimizeCommand;
+        //public ICommand MaximizeCommand => _windowViewModel.MaximizeCommand;
+        //public ICommand CloseCommand => _windowViewModel.CloseCommand;
 
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -96,8 +96,11 @@ namespace Client.Shared.Helpers.DB
             {
                 throw new ArgumentException("No values supplied");
             }
-
-            return "UPDATE {0} SET {1} {2}".SFormat(EscapeTableName(table), string.Join(", ", values.Select((v) => v.Name + " = " + v.Value)), BuildWhere(wheres));
+            return "UPDATE {0} SET {1} {2}".SFormat(
+                EscapeTableName(table),
+                string.Join(", ", values.Select((v) =>
+                    v.Name + " = " + (v.Value is string ? EscapeTableName((string)v.Value) : v.Value))),
+                BuildWhere(wheres));
         }
 
         /// <summary>
@@ -125,7 +128,10 @@ namespace Client.Shared.Helpers.DB
             foreach (SqlValue value in values)
             {
                 stringBuilder.Append(value.Name);
-                stringBuilder2.Append(value.Value.ToString());
+                stringBuilder2.Append(value.Value is string 
+                    ? EscapeTableName((string)value.Value) 
+                    : value.Value.ToString());
+
                 if (num != values.Count - 1)
                 {
                     stringBuilder.Append(", ");
@@ -134,8 +140,8 @@ namespace Client.Shared.Helpers.DB
 
                 num++;
             }
-
-            return "INSERT INTO {0} ({1}) VALUES ({2})".SFormat(EscapeTableName(table), stringBuilder, stringBuilder2);
+            return "INSERT INTO {0} ({1}) VALUES ({2})".SFormat(
+                EscapeTableName(table), stringBuilder, stringBuilder2);
         }
 
         /// <summary>
@@ -143,14 +149,16 @@ namespace Client.Shared.Helpers.DB
         /// </summary>
         /// <param name="wheres"></param>
         /// <returns></returns>
-        protected static string BuildWhere(List<SqlValue> wheres)
+        protected string BuildWhere(List<SqlValue> wheres)
         {
             if (wheres.Count == 0)
             {
                 return string.Empty;
             }
 
-            return "WHERE {0}".SFormat(string.Join(", ", wheres.Select((v) => v.Name + " = " + v.Value)));
+            return "WHERE {0}".SFormat(string.Join(", ", wheres.Select(
+                (v) => v.Name + " = " + (v.Value is string ? EscapeTableName((string)v.Value) : v.Value)))
+            );
         }
     }
 }

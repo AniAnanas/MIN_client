@@ -34,28 +34,28 @@ namespace Client.ViewModels
         public string Title
         {
             get => _title;
-            set { if (_title == value) return; _title = value; RaisePropertyChanged(); }
+            set { if (_title == value) return; _title = value; RaisePropertyChanged(nameof(Title)); }
         }
 
         private string? _avatar;
         public string? Avatar
         {
             get => _avatar;
-            set { if (_avatar == value) return; _avatar = value; RaisePropertyChanged(); }
+            set { if (_avatar == value) return; _avatar = value; RaisePropertyChanged(nameof(Avatar)); }
         }
 
         private MessageModel _lastMessage;
         public MessageModel LastMessage
         {
             get => _lastMessage;
-            set { if (_lastMessage == value) return; _lastMessage = value; RaisePropertyChanged(); }
+            set { if (_lastMessage == value) return; _lastMessage = value; RaisePropertyChanged(nameof(LastMessage)); }
         }
 
         private bool _isOnline;
         public bool IsOnline
         {
             get => _isOnline;
-            set { if (_isOnline == value) return; _isOnline = value; RaisePropertyChanged(); }
+            set { if (_isOnline == value) return; _isOnline = value; RaisePropertyChanged(nameof(IsOnline)); }
         }
 
         private int _unreadCount;
@@ -66,7 +66,6 @@ namespace Client.ViewModels
             {
                 if (_unreadCount == value) return;
                 _unreadCount = value;
-                RaisePropertyChanged();
                 RaisePropertyChanged(nameof(HasUnread));
             }
         }
@@ -74,6 +73,8 @@ namespace Client.ViewModels
         { 
             get 
             {
+                if (LastMessage == null)
+                    return "";
                 TimeSpan span = DateTime.Now - LastMessage.Timestamp;
                 return span < new TimeSpan(1, 0, 0, 0)
                     ? LastMessage.Timestamp.ToString("HH:mm")
@@ -92,6 +93,12 @@ namespace Client.ViewModels
             {
                 case nameof(ChatModel.Id):
                     Id = _chat.Id;
+                    RaisePropertyChanged(nameof(Id));
+                    break;
+                case nameof(ChatModel.User):
+                    Title = _chat.User.Fullname;
+                    Avatar = _chat.User.Avatar;
+                    IsOnline = _chat.User.IsOnline;
                     break;
                 case nameof(ChatModel.User.Fullname):
                     Title = _chat.User.Fullname;
@@ -101,15 +108,15 @@ namespace Client.ViewModels
                     break;
                 case nameof(ChatModel.LastMessage):
                     LastMessage = _chat.LastMessage;
+                    RaisePropertyChanged(nameof(Time));
                     break;
                 case nameof(ChatModel.User.IsOnline):
                     IsOnline = _chat.User.IsOnline;
                     break;
                 case nameof(ChatModel.UnreadCount):
                     UnreadCount = _chat.UnreadCount;
+                    RaisePropertyChanged(nameof(HasUnread));
                     break;
-
-                    // other mapped properties...
             }
         }
         public event PropertyChangedEventHandler? PropertyChanged;

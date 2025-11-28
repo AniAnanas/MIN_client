@@ -9,7 +9,7 @@ namespace Client.Models
         private string _text = text;
         private DateTime _timestamp = time;
         private UserModel _sender = user;
-        private readonly bool _isOwn = user.itsMeTrustBro;
+        private readonly bool _isOwn = user.Id == ((App)App.Current)?.Net?.CurrentUserId;
         public long Id
         {
             get => _id;
@@ -61,6 +61,11 @@ namespace Client.Models
         public override int GetHashCode()
         {
             return HashCode.Combine(_id, _text, _timestamp, _sender, _isOwn);
+        }
+
+        public override string ToString()
+        {
+            return $"MessageModel{{Id={Id}, UserId={User.Id}, Text={Text}, Time={Timestamp}}}";
         }
     }
 }

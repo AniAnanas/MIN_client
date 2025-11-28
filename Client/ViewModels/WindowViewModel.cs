@@ -36,33 +36,33 @@ namespace Client.ViewModels
             }
         }
 
-        public ICommand MinimizeCommand { get; }
-        public ICommand MaximizeCommand { get; }
-        public ICommand CloseCommand { get; }
+        //public ICommand MinimizeCommand { get; }
+        //public ICommand MaximizeCommand { get; }
+        //public ICommand CloseCommand { get; }
         public ICommand DragMoveCommand { get; }
 
         public WindowViewModel()
         {
-            MinimizeCommand = new RelayCommand(_ => MinimizeWindow());
-            MaximizeCommand = new RelayCommand(_ => ToggleMaximize());
-            CloseCommand = new RelayCommand(_ => CloseWindow());
+            //MinimizeCommand = new RelayCommand(_ => MinimizeWindow());
+            //MaximizeCommand = new RelayCommand(_ => ToggleMaximize());
+            //CloseCommand = new RelayCommand(_ => CloseWindow());
             DragMoveCommand = new RelayCommand(_ => DragMove());
         }
 
-        private void MinimizeWindow()
-        {
-            WindowState = WindowState.Minimized;
-        }
+        //private void MinimizeWindow()
+        //{
+        //    WindowState = WindowState.Minimized;
+        //}
 
-        private void ToggleMaximize()
-        {
-            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-        }
+        //private void ToggleMaximize()
+        //{
+        //    WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        //}
 
-        private void CloseWindow()
-        {
-            Application.Current.Shutdown();
-        }
+        //private void CloseWindow()
+        //{
+        //    Application.Current.Shutdown();
+        //}
 
         private void DragMove()
         {

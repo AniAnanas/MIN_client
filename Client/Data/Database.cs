@@ -57,10 +57,10 @@ public class Database
     {
         // Используем SqlTableCreator для создания таблицы Accounts
         var creator = new SqlTableCreator((SqliteConnection)_connection, new SqliteQueryCreator());
-        var table = new SqlTable("Accounts",
-            new SqlColumn("Id", MySqlDbType.Int32) { Primary = true, AutoIncrement = true },
-            new SqlColumn("AccountID", MySqlDbType.Text) { Unique = true, NotNull = true },
-            new SqlColumn("Balance", MySqlDbType.Int64) { DefaultValue = "0" }
+        var table = new SqlTable("Users",
+            new SqlColumn("Id", MySqlDbType.Int32) { Primary = true },
+            new SqlColumn("Username", MySqlDbType.Text) { Unique = true, NotNull = true },
+            new SqlColumn("FirstName", MySqlDbType.Text) { DefaultValue = "No Name" }
         );
         creator.EnsureTableStructure(table);
     }
@@ -77,7 +77,7 @@ public class Database
         return ((SqliteConnection)_connection).CreateCommand();
     }
 
-    public void CreatePlayer(string AccountID)
+    public void AddUser(string AccountID)
     {
         if (!CacheManager.Cache.GetCache<long>("Balance").TryGetValue(AccountID, out _))
         {

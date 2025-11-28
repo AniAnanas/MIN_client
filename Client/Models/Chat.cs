@@ -33,12 +33,12 @@ namespace Client.Models
             set { _messages = value; }
         }
 
-        public MessageModel LastMessage
+        public MessageModel? LastMessage
         {
-            get => _messages.OrderBy((m) => m.Id).Last();
+            get => _messages?.Count != 0 ? _messages?.OrderBy((m) => m.Id).LastOrDefault() : null;
         }
 
-        public string Time => LastMessage.Time;
+        public string Time => LastMessage?.Time ?? "";
         
         public int UnreadCount
         {

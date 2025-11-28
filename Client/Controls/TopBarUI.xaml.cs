@@ -18,11 +18,13 @@ namespace Client.Controls
         }
         private void MinimizeBtn_Click(object sender, RoutedEventArgs e) 
         { 
+            //ViewModel?.MinimizeCommand?.Execute(null);
             var window = Window.GetWindow(this);
-            if(window != null) window.WindowState = WindowState.Minimized;
+            if (window != null) window.WindowState = WindowState.Minimized;
         }
         private void MaximizeBtn_Click(object sender, RoutedEventArgs e) 
         {
+            //ViewModel?.MaximizeCommand?.Execute(null);
             var window = Window.GetWindow(this);
             if (window == null) return;
 
@@ -32,6 +34,7 @@ namespace Client.Controls
         }
         private void CloseBtn_Click(object sender, RoutedEventArgs e) 
         {
+            //ViewModel?.CloseCommand?.Execute(null);
             var window = Window.GetWindow(this);
             if (window != null) window.Close();
             else Application.Current.Shutdown();
@@ -87,10 +90,15 @@ namespace Client.Controls
                 if (e.ClickCount == 2)
                 {
                     // Double click - toggle maximize
-                    if (ViewModel?.MaximizeCommand?.CanExecute(null) == true)
-                    {
-                        ViewModel.MaximizeCommand.Execute(null);
-                    }
+                    //if (ViewModel?.MaximizeCommand?.CanExecute(null) == true)
+                    //{
+                    //    ViewModel.MaximizeCommand.Execute(null);
+                    //}
+                    var window = Window.GetWindow(this);
+                    if (window == null) return;
+                    window.WindowState = window.WindowState == WindowState.Maximized
+                        ? WindowState.Normal
+                        : WindowState.Maximized;
                 }
                 else
                 {

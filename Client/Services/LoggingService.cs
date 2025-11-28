@@ -5,12 +5,12 @@ namespace Client.Services;
 
 public class LoggingService : ILoggingService
 {
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
     private readonly string _logPath;
 
     public LoggingService()
     {
-        _logPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+        _logPath = Path.Combine(Environment.CurrentDirectory, "Logs");
         CreateFolder();
     }
 
@@ -35,10 +35,12 @@ public class LoggingService : ILoggingService
         {
             lock (_lock)
             {
+                if (App.Current == null) return;
+
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH:mm:ss");
-                string lastBoot = DateTime.Now.ToString("yyyy-MM-dd");
+                string lastBoot = ((App)App.Current).StartTime.ToString("HH-mm-ss_dd-MM-yyyy");
                 var stackTrace = new System.Diagnostics.StackTrace();
-                var frame = stackTrace.GetFrame(2)?.GetMethod(); // Go up two frames to get the actual caller
+                var frame = stackTrace.GetFrame(3)?.GetMethod(); // Go up 3 frames to get the actual caller
                 var methodName = frame?.Name ?? "Unknown";
                 var className = frame?.ReflectedType?.Name ?? "Unknown";
 

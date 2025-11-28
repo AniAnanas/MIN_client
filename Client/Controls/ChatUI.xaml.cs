@@ -15,82 +15,57 @@ namespace Client.Controls
         public ChatUI()
         {
             InitializeComponent();
-            // DataContext will be set by parent or binding
+            DataContextChanged += ChatUI_DataContextChanged;
         }
 
-        // Dependency property for ChatViewModel
-        public ChatViewModel ViewModel
+        private void ChatUI_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            get { return (ChatViewModel)GetValue(ViewModelProperty); }
-            set { SetValue(ViewModelProperty, value); }
-        }
-
-        public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register("ViewModel", typeof(ChatViewModel),
-                typeof(ChatUI), new PropertyMetadata(null, OnViewModelChanged));
-
-        private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var control = d as ChatUI;
-            if (control != null)
+            // Отписываемся от старого ViewModel
+            if (e.OldValue is ChatViewModel oldViewModel)
             {
-                control.DataContext = e.NewValue;
+                oldViewModel.Messages.CollectionChanged -= Messages_CollectionChanged;
+            }
+
+            // Подписываемся на новый ViewModel
+            if (e.NewValue is ChatViewModel newViewModel)
+            {
+                newViewModel.Messages.CollectionChanged += Messages_CollectionChanged;
+
+                // Сразу скроллим к последнему сообщению
+                ScrollToBottom();
             }
         }
 
-        // Message input text property
-        public string MessageText
+        private void Messages_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            get { return (string)GetValue(MessageTextProperty); }
-            set { SetValue(MessageTextProperty, value); }
+            // Автоматически скроллим к новому сообщению
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                ScrollToBottom();
+            }
         }
 
-        public static readonly DependencyProperty MessageTextProperty =
-            DependencyProperty.Register("MessageText", typeof(string),
-                typeof(ChatUI), new PropertyMetadata(string.Empty, OnMessageTextChanged));
-
-        private static void OnMessageTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private void ScrollToBottom()
         {
-            var control = d as ChatUI;
-            if (control?.ViewModel != null)
+            // Откладываем скроллинг, чтобы дать UI время на обновление
+            Dispatcher.InvokeAsync(() =>
             {
-                // Update ViewModel draft if needed
-                // control.ViewModel.Draft = e.NewValue as string ?? string.Empty;
-            }
+                MessagesScrollViewer?.ScrollToEnd();
+            }, System.Windows.Threading.DispatcherPriority.Background);
         }
 
         // Message input handlers
-        private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (e.Handled) return;
-
-            var textBox = sender as TextBox;
-            if (textBox != null)
-            {
-                MessageText = textBox.Text;
-            }
-        }
+        private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e) { }
 
         private void MessageTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Handled) return;
-
- 
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
                 e.Handled = true;
-                SendMessage();
-            }
-        }
-
-        private void SendMessage()
-        {
-            if (ViewModel != null && !string.IsNullOrWhiteSpace(MessageText))
-            {
-                // TODO: Implement message sending through ViewModel
-                Log.Info($"Sending message: {MessageText}");
-                MessageText = string.Empty;
-                
+                if (DataContext is ChatViewModel viewModel && viewModel.SendMessageCommand.CanExecute(null))
+                {
+                    viewModel.SendMessageCommand.Execute(null);
+                }
             }
         }
 
@@ -107,35 +82,11 @@ namespace Client.Controls
                 }
             }
         }
-
-        // Send button click
-        private void SendButton_Click(object sender, RoutedEventArgs e) => SendMessage();
-
         // Attach file button
         private void AttachButton_Click(object sender, RoutedEventArgs e)
         {
             // TODO: Open file picker
             Log.Info("Attach file clicked");
         }
-
-        // Emoji button
-        private void EmojiButton_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Show emoji picker
-            Log.Info("Emoji picker clicked");
-        }
     }
-    public class StringNullOrEmptyToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return string.IsNullOrEmpty(value as string) ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException(); 
-        }
-    }
-
 }

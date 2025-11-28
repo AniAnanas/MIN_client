@@ -64,11 +64,12 @@ public class QueryResult : IDisposable
 
     public T Get<T>(string column)
     {
-        if (Reader == null)
+        int? ordinal = null;
+        if (Reader == null || Reader.IsDBNull((int)(ordinal = Reader.GetOrdinal(column))))
         {
             return default;
         }
 
-        return Reader.Get<T>(Reader.GetOrdinal(column));
+        return Reader.Get<T>(ordinal ?? Reader.GetOrdinal(column));
     }
 }

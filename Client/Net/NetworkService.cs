@@ -19,9 +19,10 @@ public class NetworkService : INetworkService
     private CancellationTokenSource _cts;
     private bool _isConnected;
 
-    
+    public long CurrentUserId { get; private set; } = -1;
+
     public event Action<MessageModel> MessageReceived;
-    public event Action<UserModel[]> UsersReceived;
+    public event Action<UserModel[]> UsersReceived = (_)=>{};
     public event Action<(long userId, bool isOnline)> UserStatusChanged;
 
     private TaskCompletionSource<long> _loginTcs;
@@ -34,8 +35,14 @@ public class NetworkService : INetworkService
     class PingInfo
     {
         public DateTime LastSentAt { get; set; }
-        public DateTime LastPongAt { get; set; }
-        public double LastPingMs => (LastPongAt - LastSentAt).TotalMilliseconds;
+        public DateTime LastGetAt { get; set; }
+        public double LastPingMs 
+        {
+            get 
+            {
+                return (LastGetAt.Ticks - LastSentAt.Ticks) / (double)10000;
+            }
+        }
     }
 
     private PingInfo _pingInfo;
@@ -43,6 +50,11 @@ public class NetworkService : INetworkService
 
     public async Task<bool> ConnectAsync(string host, int port)
     {
+        if (_client != null && _client.Connected)
+        {
+            Log.Warn("Already connected.");
+            return true;
+        }
         try
         {
             _client = new TcpClient();
@@ -56,7 +68,10 @@ public class NetworkService : INetworkService
             
             _pingInfo = new PingInfo();
             await PingAsync();
-
+            
+            //цикл пингов
+            _ = Task.Run(() => { do { Task.WaitAll(PingAsync(), Task.Delay(15 * 1000)); } while (!_cts.Token.IsCancellationRequested); });
+            
             Log.Info($"Connected to {host}:{port}, ping: {PingToServerMs}ms");
             return true;
         }
@@ -65,12 +80,6 @@ public class NetworkService : INetworkService
             Log.Error($"Connection failed: {ex.Message}");
             return false;
         }
-    }
-
-    public async Task LogoutAsync()
-    {
-        var packet = PacketBuilder.Create(PacketType.LogoutRequest);
-        await SendDataAsync(packet);
     }
 
     public async Task<(long userId, string token)> RegisterAsync(string username, string password)
@@ -88,7 +97,9 @@ public class NetworkService : INetworkService
         var task = _tokenTcs.Task;
         if (await Task.WhenAny(task, Task.Delay(5000)) == task)
         {
-            return await task;
+            var result = await task;
+            CurrentUserId = result.userId;
+            return result;
         }
 
         _tokenTcs.TrySetCanceled();
@@ -111,7 +122,9 @@ public class NetworkService : INetworkService
         var task = _tokenTcs.Task;
         if (await Task.WhenAny(task, Task.Delay(5000)) == task)
         {
-            return await task;
+            var result = await task;
+            CurrentUserId = result.userId;
+            return result;
         }
 
         _tokenTcs.TrySetCanceled();
@@ -132,13 +145,14 @@ public class NetworkService : INetworkService
         var task = _loginTcs.Task;
         if (await Task.WhenAny(task, Task.Delay(5000)) == task)
         {
-            return await task;
+            return CurrentUserId = await task;
         }
         return -1;
     }
 
     public async Task<long> SendMessageAsync(long recipientId, string text)
     {
+        if (!_isConnected) throw new Exception("Not connected to server");
         _sendedMsgTcs = new();
 
         var packet = PacketBuilder.Create(PacketType.SendMessage, bw =>
@@ -149,7 +163,7 @@ public class NetworkService : INetworkService
 
         await SendDataAsync(packet);
 
-        var task = _loginTcs.Task;
+        var task = _sendedMsgTcs.Task;
         if (await Task.WhenAny(task, Task.Delay(5000)) == task)
         {
             return await task;
@@ -158,7 +172,7 @@ public class NetworkService : INetworkService
         return default;
     }
 
-    public async Task<MessageModel[]> GetHistoryAsync(long userId)
+    public async Task<MessageModel[]> GetHistoryAsync(long userId, int limit = 50)
     {
         _historyTcs = new();
 
@@ -166,7 +180,7 @@ public class NetworkService : INetworkService
         var packet = PacketBuilder.Create(PacketType.HistoryRequest, bw =>
         {
             bw.Write(userId); // User ID
-            bw.Write((uint)50); // лимит сообщений
+            bw.Write((uint)limit); // лимит сообщений
         });
 
         await SendDataAsync(packet);
@@ -229,7 +243,7 @@ public class NetworkService : INetworkService
         if (!_isConnected) return;
         try
         {
-            await _stream.WriteAsync(data);
+            await _stream.WriteAsync(data.AsMemory());
             await _stream.FlushAsync();
         }
         catch (Exception ex)
@@ -238,9 +252,15 @@ public class NetworkService : INetworkService
             _isConnected = false;
         }
     }
-
+    public async Task Disconnect(bool sendPacket = false)
+    {
+        if (sendPacket)
+            await SendDataAsync(PacketBuilder.Create(PacketType.LogoutRequest));
+        _cts.Cancel();
+    }
     private async Task ReceiveLoop(CancellationToken token)
     {
+        Log.Info("Loop started.");
         try
         {
             while (!token.IsCancellationRequested && _isConnected)
@@ -272,6 +292,7 @@ public class NetworkService : INetworkService
         finally
         {
             _isConnected = false;
+            _stream?.Close();
             _client?.Close();
             Log.Info("Disconnected");
         }
@@ -340,6 +361,13 @@ public class NetworkService : INetworkService
                     else _loginTcs?.TrySetException(new Exception("Auth failed"));
                     break;
                 }
+            case PacketType.SendMessageResponse:
+                {
+                    long msgId = br.ReadInt64();
+                    if (msgId != -1) _sendedMsgTcs?.TrySetResult(msgId);
+                    else _sendedMsgTcs?.TrySetException(new Exception("Sended message failed, Id = -1"));
+                    break;
+                }
             case PacketType.ReceiveMessage:
                 {
                     long msgId = br.ReadInt64();
@@ -397,12 +425,12 @@ public class NetworkService : INetworkService
                     }
 
                     _getUsersTcs?.SetResult([.. users]);
-
+                    //UsersReceived?.Invoke([.. users]);
                     break;
                 }
             case PacketType.Pong:
                 {
-                    _pingInfo.LastPongAt = DateTime.Now;
+                    _pingInfo.LastGetAt = DateTime.Now;
                     Log.Info("Get PONG (0x000F): ping - {0}ms".SFormat(PingToServerMs));
                     break;
                 }

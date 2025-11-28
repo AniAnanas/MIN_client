@@ -30,8 +30,8 @@ namespace Client
         public static Config Read()
         {
             //string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "Settings");
-            string directoryPath = Directory.GetCurrentDirectory();
-            string configPath = Path.Combine(directoryPath, "Config.json");
+            string directoryPath = Environment.CurrentDirectory;
+            string configPath = Path.Combine(directoryPath, "Data", "Config.json");
             Directory.CreateDirectory(directoryPath);
 
             try

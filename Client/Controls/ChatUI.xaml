@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Client.Controls"
              xmlns:models="clr-namespace:Client.Models" 
+             xmlns:converters="clr-namespace:Client.Converters"
              xmlns:viewmodels="clr-namespace:Client.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
@@ -12,27 +13,56 @@
              d:Background="#FF1E1E1E">
 
     <UserControl.Resources>
-        <local:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
+        <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
+        <converters:InverseStringNullOrEmptyToVisibilityConverter x:Key="InverseStringNullOrEmptyToVisibilityConverter"/>
+        <converters:OnlineStatusConverter x:Key="OnlineStatusConverter"/>
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+        
+        <!-- Incoming Message Template -->
         <DataTemplate x:Key="IncomingMessageTemplate" DataType="{x:Type models:MessageModel}">
-            <Border Margin="6" Padding="8" CornerRadius="12" Background="#2B2B2B" MaxWidth="480" HorizontalAlignment="Left">
+            <Border Margin="6" Padding="8" 
+                    CornerRadius="16,16,16,3" Background="#2B2B2B" 
+                    MaxWidth="480" MinWidth="120" HorizontalAlignment="Left">
                 <StackPanel>
-                    <TextBlock Text="{Binding User}" Foreground="#AAAAAA" FontSize="10"
-                           Visibility="{Binding User, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
-                    <TextBlock Text="{Binding Text}" Foreground="White" TextWrapping="Wrap" FontSize="14" Margin="0,4,0,0"/>
-                    <TextBlock Text="{Binding Time, StringFormat={}{0:HH:mm}}" Foreground="#777777" FontSize="9" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                    <TextBlock Text="{Binding User.Name}" 
+                               Foreground="#AAAAAA" 
+                               FontSize="10"
+                               Margin="4,0,0,0"
+                               Visibility="{Binding User.Name, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                    <TextBlock Text="{Binding Text}" 
+                               Foreground="White" 
+                               TextWrapping="Wrap" 
+                               FontSize="14" 
+                               Margin="5,4,5,0"/>
+                    <TextBlock Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss}}" 
+                               Foreground="#777777" 
+                               FontSize="9" 
+                               HorizontalAlignment="Right" 
+                               Margin="0,0,0,0"/>
                 </StackPanel>
             </Border>
         </DataTemplate>
 
+        <!-- Outgoing Message Template -->
         <DataTemplate x:Key="OutgoingMessageTemplate" DataType="{x:Type models:MessageModel}">
-            <Border Margin="6" Padding="8" CornerRadius="12" Background="#005A9E" MaxWidth="480" HorizontalAlignment="Right">
+            <Border Margin="6" Padding="8" 
+                    CornerRadius="16,16,3,16" Background="#3F3F3F" 
+                    MaxWidth="480" MinWidth="120" HorizontalAlignment="Right">
                 <StackPanel>
-                    <TextBlock Text="{Binding Text}" Foreground="White" TextWrapping="Wrap" FontSize="14"/>
-                    <TextBlock Text="{Binding Time, StringFormat={}{0:HH:mm}}" Foreground="#DDEEFF" FontSize="9" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                    <TextBlock Text="{Binding Text}" 
+                               Foreground="White" 
+                               TextWrapping="Wrap" 
+                               FontSize="14"/>
+                    <TextBlock Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss}}" 
+                               Foreground="#DDEEFF" 
+                               FontSize="9"
+                               HorizontalAlignment="Right" 
+                               Margin="5,4,5,0"/>
                 </StackPanel>
             </Border>
         </DataTemplate>
 
+        <!-- Message Template Selector -->
         <DataTemplate x:Key="MessageSelectorTemplate" DataType="{x:Type models:MessageModel}">
             <ContentControl Content="{Binding}">
                 <ContentControl.Style>
@@ -51,12 +81,42 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- Chat Header -->
+        <Border Grid.Row="0" 
+                Background="#BB2F2F2F" 
+                Padding="15,10"
+                Margin="0"
+                CornerRadius="12, 12, 6, 6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Avatar -->
+                <Ellipse Grid.Column="0" Width="40" Height="40" Fill="#555555"/>
+
+                <!-- User Info -->
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}" 
+                               Foreground="White" 
+                               FontSize="16" 
+                               FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding IsOnline, Converter={StaticResource OnlineStatusConverter}}" 
+                               Foreground="#AAAAAA" 
+                               FontSize="12"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
         <!-- Сообщения с авто-скроллом -->
-        <Border Grid.Row="0" Margin="12" Background="Transparent">
+        <Border Grid.Row="1" Margin="12, 0" Background="Transparent">
             <ScrollViewer x:Name="MessagesScrollViewer" VerticalScrollBarVisibility="Auto" Focusable="False">
                 <ItemsControl x:Name="MessagesItemsControl" ItemsSource="{Binding Messages}" ItemTemplate="{StaticResource MessageSelectorTemplate}">
                     <ItemsControl.ItemsPanel>
@@ -71,37 +131,69 @@
         </Border>
         
         <!-- Панель ввода сообщения -->
-        <Border Grid.Row="1" Background="#4C000000" Padding="5" Margin="12" CornerRadius="16">
+        <Border Grid.Row="2"
+                Background="#4C000000"
+                Padding="5"
+                Margin="12"
+                CornerRadius="16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0" Width="32" Height="32" Background="Transparent" BorderBrush="Transparent" Click="AttachButton_Click">
-                    <Image Source="/Content/Skrepka.png" Width="18" Height="18"/>
-                </Button>
+                <Border Grid.Column="0">
+                    <Button Width="32" Height="32" 
+                            Background="Transparent" 
+                            BorderBrush="Transparent" 
+                            Click="AttachButton_Click"
+                            Cursor="Hand">
+                        <Image Source="/Content/Skrepka.png"
+                               Width="18" Height="18"/>
+                    </Button>
+                </Border>
 
                 <Grid Grid.Column="1">
                     <TextBox x:Name="Input_Area"
-               Text="{Binding MessageText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-         Foreground="White" FontSize="13" VerticalAlignment="Center"
-        Background="Transparent" BorderThickness="0"
-          CaretBrush="#777777"
-AcceptsReturn="True" TextWrapping="Wrap"
- KeyDown="MessageTextBox_KeyDown"
-             TextChanged="MessageTextBox_TextChanged"
-            VerticalScrollBarVisibility="Auto"
-     Padding="6,4"/>
-                    <TextBlock Text="Сообщение..." Foreground="#777777" FontSize="13" VerticalAlignment="Center" Margin="8,0,0,0"
-                           IsHitTestVisible="False"
-                           Visibility="{Binding Text, ElementName=Input_Area, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                            Text="{Binding MessageText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Foreground="White" 
+                            FontSize="13" 
+                            VerticalAlignment="Center"
+                            Background="Transparent" 
+                            BorderThickness="0"
+                            CaretBrush="#777777"
+                            AcceptsReturn="True" 
+                            TextWrapping="Wrap"
+                            KeyDown="MessageTextBox_KeyDown"
+                            TextChanged="MessageTextBox_TextChanged"
+                            VerticalScrollBarVisibility="Auto"
+                            MaxHeight="256"
+                            Padding="6,4"
+                            Cursor="IBeam"/>
+                    <TextBlock Text="Сообщение..." 
+                            Foreground="#777777" 
+                            FontSize="13" 
+                            VerticalAlignment="Center" 
+                            Margin="8,0,0,0"
+                            IsHitTestVisible="False"
+                            Visibility="{Binding Text, ElementName=Input_Area, Converter={StaticResource InverseStringNullOrEmptyToVisibilityConverter}}"/>
                 </Grid>
 
-                <Button Grid.Column="2" Width="36" Height="36" HorizontalAlignment="Right" Background="Transparent" BorderBrush="Transparent" Click="SendButton_Click">
-                    <Image Source="/Content/SendArrow.png" Width="18" Height="18"/>
-                </Button>
+                <Border Grid.Column="2"
+                        CornerRadius="18" 
+                        BorderThickness="2"
+                        Height="Auto" Width="Auto">
+                    <Button Width="36" Height="36" 
+                            HorizontalAlignment="Right" 
+                            Background="Transparent" 
+                            BorderBrush="Transparent" 
+                            Command="{Binding SendMessageCommand}"
+                            IsEnabled="{Binding IsSending, Converter={StaticResource InverseBoolConverter}}"
+                            ToolTip="Отправить сообщение"
+                            Cursor="Hand">
+                        <Image Source="/Content/SendArrow.png" Width="18" Height="18"/>
+                    </Button>
+                </Border>
             </Grid>
         </Border>
     </Grid>
