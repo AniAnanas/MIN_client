@@ -31,6 +31,7 @@ namespace Client
         {
             //string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "Settings");
             string directoryPath = Environment.CurrentDirectory;
+            Directory.CreateDirectory(Path.Combine(directoryPath, "Data"));
             string configPath = Path.Combine(directoryPath, "Data", "Config.json");
             Directory.CreateDirectory(directoryPath);
 
