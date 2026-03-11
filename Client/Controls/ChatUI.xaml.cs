@@ -59,7 +59,7 @@ namespace Client.Controls
 
         private void MessageTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
             {
                 e.Handled = true;
                 if (DataContext is ChatViewModel viewModel && viewModel.SendMessageCommand.CanExecute(null))

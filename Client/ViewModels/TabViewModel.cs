@@ -19,7 +19,7 @@ namespace Client.ViewModels
             _chat = chat ?? throw new ArgumentNullException(nameof(chat));
             // Initial projection
             Id = _chat.Id;
-            Title = _chat.User.Fullname;
+            Title = _chat.User.Fullname + " (ID:" + _chat.User.Id + ")";
             Avatar = _chat.User.Avatar;
             LastMessage = _chat.LastMessage;
             IsOnline = _chat.User.IsOnline;

@@ -11,7 +11,6 @@ namespace Client.Models
         private string _username = string.Empty;
         private string? _avatar;
         private bool _isOnline = false;
-        public bool itsMeTrustBro = false;
         public long Id
         {
             get => _id;
@@ -55,5 +54,13 @@ namespace Client.Models
             LastName = lastName;
             Avatar = avatar;
         }
+
+        public override string ToString()
+        {
+            return $"{{id:{_id},username:{_username??"NONE"},name:{_name??"NONE"},lastname:{_lastName??"NONE"},isonline:{_isOnline},avatar:{_avatar??"NONE"}}}";
+        }
+
+        public static UserModel Unknown(long id) => new(id, "Unknown", "Unknown");
+        public static UserModel Unknown() => new(-1, "Unknown", "Unknown");
     }
 }

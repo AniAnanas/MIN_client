@@ -100,4 +100,17 @@ namespace Client.Converters
             return false;
         }
     }
+
+    public class ButtonToImageOpacityConverter : IValueConverter
+    {
+        public double EnabledOpacity { get; set; } = 1.0;
+        public double DisabledOpacity { get; set; } = 0.35;
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            => (value is bool b && b) ? EnabledOpacity : DisabledOpacity;
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => Binding.DoNothing;
+    }
+
 }

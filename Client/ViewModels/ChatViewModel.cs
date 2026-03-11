@@ -184,9 +184,6 @@ namespace Client.ViewModels
                 return;
 
             string messageText = MessageText.Trim();
-            if (string.IsNullOrWhiteSpace(messageText))
-                return;
-
             try
             {
                 IsSending = true;
@@ -208,10 +205,10 @@ namespace Client.ViewModels
                         result,
                         messageText,
                         DateTime.Now,
-                        new UserModel(_currentUserId, _databaseService.GetSetting("CurrenUsername"), "Я") { itsMeTrustBro = true }
+                        _networkService.CurrentUser
                     );
 
-                _databaseService.SaveMessageFromModel(message, _chat.User.Id, isOutgoing: true);
+                OutgoingMessageSended?.Invoke(message, _chat.User.Id);
                 App.Current.Dispatcher.Invoke(() =>
                 {
                     _chat.Messages.Add(message);
@@ -231,7 +228,7 @@ namespace Client.ViewModels
         }
         private bool CanSendMessage()
         {
-            return !IsSending && !string.IsNullOrWhiteSpace(MessageText);
+            return !IsSending && !string.IsNullOrWhiteSpace(MessageText.Trim());
         }
 
         /// <summary>
@@ -239,11 +236,16 @@ namespace Client.ViewModels
         /// </summary>
         public void AddIncomingMessage(MessageModel message)
         {
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                _chat.Messages.Add(message);
-                Log.Info($"Added incoming message to chat {_chat.User.Id}");
-            });
+            //if (_chat.Messages.Any(m => m.Id == message.Id))
+            //{
+            //    Log.Warn($"Message {message.Id} already exists in chat {_chat.User.Id}, skipping.");
+            //    return;
+            //}
+            //App.Current.Dispatcher.Invoke(() =>
+            //{
+            //    _chat.Messages.Add(message);
+            //    Log.Info($"Added incoming message to chat {_chat.User.Id}");
+            //});
         }
 
         #endregion
@@ -281,6 +283,7 @@ namespace Client.ViewModels
             _disposed = true;
         }
 
+        public event Action<MessageModel, long>? OutgoingMessageSended;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? name = null) =>

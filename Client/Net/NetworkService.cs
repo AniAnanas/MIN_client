@@ -8,6 +8,7 @@ using System.Text;
 using System.Net.Sockets;
 using Client.Shared.Interfaces;
 using Client.Models;
+using Client.Data;
 
 namespace Client.Net;
 
@@ -15,11 +16,13 @@ public class NetworkService : INetworkService
 {
     private TcpClient _client;
     private NetworkStream _stream;
+    private DatabaseService _db;
 
     private CancellationTokenSource _cts;
     private bool _isConnected;
 
     public long CurrentUserId { get; private set; } = -1;
+    public UserModel CurrentUser { get; private set; } = new(-1, "unknown", "unknown");
 
     public event Action<MessageModel> MessageReceived;
     public event Action<UserModel[]> UsersReceived = (_)=>{};
@@ -73,6 +76,10 @@ public class NetworkService : INetworkService
             _ = Task.Run(() => { do { Task.WaitAll(PingAsync(), Task.Delay(15 * 1000)); } while (!_cts.Token.IsCancellationRequested); });
             
             Log.Info($"Connected to {host}:{port}, ping: {PingToServerMs}ms");
+            
+            try { _db = (DatabaseService)App.Current.Resources["Database"]; }
+            catch (Exception e) { Log.Error("[ConnectAsync->DB Link] Is DB registered? Recommended to restart. Exc:{0}".SFormat(e.Message)); }
+
             return true;
         }
         catch (Exception ex)
@@ -98,7 +105,7 @@ public class NetworkService : INetworkService
         if (await Task.WhenAny(task, Task.Delay(5000)) == task)
         {
             var result = await task;
-            CurrentUserId = result.userId;
+            CurrentUserId = CurrentUser.Id = result.userId;
             return result;
         }
 
@@ -118,12 +125,11 @@ public class NetworkService : INetworkService
 
         await SendDataAsync(packet);
 
-        // Ждем ответа или таймаута
         var task = _tokenTcs.Task;
         if (await Task.WhenAny(task, Task.Delay(5000)) == task)
         {
             var result = await task;
-            CurrentUserId = result.userId;
+            CurrentUserId = CurrentUser.Id = result.userId;
             return result;
         }
 
@@ -145,7 +151,8 @@ public class NetworkService : INetworkService
         var task = _loginTcs.Task;
         if (await Task.WhenAny(task, Task.Delay(5000)) == task)
         {
-            return CurrentUserId = await task;
+            var result = await task;
+            return CurrentUserId = CurrentUser.Id = result;
         }
         return -1;
     }
@@ -380,7 +387,7 @@ public class NetworkService : INetworkService
                         msgId,
                         body,
                         DateTimeOffset.FromUnixTimeSeconds(timestamp).LocalDateTime,
-                        new UserModel(senderId, senderId.ToString()) // Пока имя неизвестно
+                        _db.GetUserById(senderId) ?? new UserModel(senderId, senderId.ToString())
                     );
 
                     MessageReceived?.Invoke(msgModel);

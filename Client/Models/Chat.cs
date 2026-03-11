@@ -14,28 +14,30 @@ namespace Client.Models
         private long _id = default;
         private UserModel _user = new(0, "None", "None");
         private ObservableCollection<MessageModel> _messages;
+        private MessageModel? _lastMessage;
         private int _unreadCount;
         //private ChatType _type;
 
         public long Id
         {
             get => _id;
-            set { OnPropertyChanged(ref _id, value, nameof(Id)); }
+            set => OnPropertyChanged(ref _id, value, nameof(Id));
         }
         public UserModel User
         {
             get => _user;
-            set { OnPropertyChanged(ref _user, value, nameof(User)); }
+            set => OnPropertyChanged(ref _user, value, nameof(User));
         }
         public ObservableCollection<MessageModel> Messages
         {
             get => _messages;
-            set { _messages = value; }
+            set => _messages = value;
         }
 
         public MessageModel? LastMessage
         {
-            get => _messages?.Count != 0 ? _messages?.OrderBy((m) => m.Id).LastOrDefault() : null;
+            get => _lastMessage;
+            private set => OnPropertyChanged(ref _lastMessage, value, nameof(LastMessage));
         }
 
         public string Time => LastMessage?.Time ?? "";
@@ -47,11 +49,13 @@ namespace Client.Models
         }
         public bool HasUnread { get => UnreadCount > 0; }
 
-        public ChatModel(int id, UserModel user, ObservableCollection<MessageModel>? messages = null)
+        public ChatModel(long id, UserModel user, ObservableCollection<MessageModel>? messages = null)
         {
             Id = id;
             User = user;
             Messages = messages ?? [];
+            _lastMessage = _messages?.Count != 0 ? _messages?.OrderBy((m) => m.Id).LastOrDefault() : null;
+            Messages.CollectionChanged += (_, _) => LastMessage = _messages?.Count != 0 ? _messages?.OrderBy((m) => m.Id).LastOrDefault() : null;
         }
     }
 }

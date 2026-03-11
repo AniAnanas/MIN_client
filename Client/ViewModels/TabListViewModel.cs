@@ -161,7 +161,7 @@ namespace Client.ViewModels
         }
 
         /// <summary>
-        /// Обрабатывает новое входящее сообщение
+        /// Обрабатывает новое входящее/исходящее сообщение в списке чатов
         /// </summary>
         public void HandleNewMessage(MessageModel message, long chatId)
         {
@@ -171,10 +171,8 @@ namespace Client.ViewModels
                 {
                     App.Current.Dispatcher.Invoke(() =>
                     {
-                        // Добавляем сообщение в существующий чат
-                        //chatModel.Messages.Add(message);
-                        chatModel.UnreadCount++;
-                        // Перемещаем чат наверх списка
+                        if (!message.IsOwn) chatModel.UnreadCount++;
+
                         var tab = _chats.FirstOrDefault(t => t.Id == chatId);
                         if (tab != null)
                         {
@@ -185,12 +183,38 @@ namespace Client.ViewModels
                 }
                 else
                 {
-                    // Создаем новый чат для нового собеседника
                     Log.Warn($"Received message from unknown user {chatId}, creating new chat");
 
-                    var user = _databaseService.GetUserById(chatId);
-                    if (user != null)
+                    UserModel user = _databaseService.GetUserById(chatId);
+                    if (user == null)
                     {
+                        var task = _networkService.GetUserListAsync();
+                        task.Wait();
+                        UserModel[] users = task.Result;
+
+                        if (!users.Any(u => u.Id == chatId))
+                        {
+                            Log.Error($"User {chatId} not found in database, cannot create chat");
+                            return;
+                        }
+                        user = users.First(u => u.Id == chatId);
+                        _databaseService.SaveOrUpdateUser(user.Id, user.Username, user.Fullname, user.IsOnline);
+                    }
+                    /* хз
+                    else
+                    {
+                        var getUsersTask = _networkService.GetUserListAsync();
+                        getUsersTask.Wait();
+                        if (getUsersTask.Result == default)
+                            Log.Error($"I recieved msg from chatID {{{chatId}}}, but server not sended users.");
+                        user = getUsersTask.Result?.FirstOrDefault((u) =>  u.Id == chatId, UserModel.Unknown(chatId));
+
+                        if (user == null)
+                        {
+                            Log.Error("Ну это пизда");
+                            return;
+                        }
+
                         var newChatModel = new ChatModel(
                             (int)chatId,
                             user,
@@ -204,7 +228,17 @@ namespace Client.ViewModels
 
                         var tabViewModel = new TabViewModel(newChatModel);
                         _chats.Insert(0, tabViewModel);
-                    }
+                    }*/
+
+                    ChatModel newChatModel = new(chatId, user, [message])
+                    {
+                        UnreadCount = message.IsOwn ? 0 : 1
+                    };
+
+                    _chatModels[chatId] = newChatModel;
+
+                    var tabViewModel = new TabViewModel(newChatModel);
+                    _chats.Insert(0, tabViewModel);
                 }
             }
             catch (Exception ex)
@@ -232,7 +266,6 @@ namespace Client.ViewModels
             }
         }
 
-        // При поступлении новых ChatModel:
         public void AddChat(ChatModel chat)
         {
             var tab = new TabViewModel(chat);
@@ -240,7 +273,6 @@ namespace Client.ViewModels
             _chatModels[chat.User.Id] = chat;
         }
 
-        // При удалении:
         public void RemoveChat(TabViewModel tab)
         {
             tab.Dispose();
@@ -254,7 +286,6 @@ namespace Client.ViewModels
             {
                 SelectedChat = chat;
 
-                // Помечаем чат как прочитанный
                 if (chat.UnreadCount > 0)
                 {
                     _databaseService.MarkChatAsRead(chat.Id);
@@ -274,44 +305,6 @@ namespace Client.ViewModels
             // TODO: Открыть диалог поиска пользователей
             Log.Info("CreateNewChat clicked - open user search dialog");
         }
-
-        //private void CreateNewChat()
-        //{
-        //    var rnd = new Random();
-        //    var user = new UserModel(rnd.Next(), "newUser " + _chats.Count);
-        //    var newChat = new ChatModel(
-        //        rnd.Next(),
-        //        user,
-        //        [ new(0, "Первое сообщ", DateTime.Now, user), new(1, "второе сообщ", DateTime.Now + new TimeSpan(rnd.Next(0, 8), 0, 0), new(1, "chupep")) ]
-        //    );
-
-        //    var chatViewModel = new TabViewModel(newChat);
-        //    _chats.Add(chatViewModel);
-
-        //    SelectedChat = chatViewModel;
-        //    Log.Info($"Created new chat: {newChat.User.Fullname}");
-        //}
-        //private void CreateMockChats()
-        //{
-        //    var random = new Random();
-
-        //    for (int i = 0; i < 5; i++)
-        //    {
-        //        var user = new UserModel(i, "user" + i, "User " + (i + 1)) { IsOnline = i % 2 == 0 };
-        //        DateTime timestamp = DateTime.Now.AddMinutes(-random.Next(0, 60));
-        //        var chat = new ChatModel(i, user,
-        //            [
-        //                new(0, $"This is first message in Chat {i + 1}", timestamp, user),
-        //                new(1, $"This is the last message in Chat {i + 1}", timestamp, user),
-        //            ]
-        //        );
-
-        //        var chatViewModel = new TabViewModel(chat);
-        //        _chats.Add(chatViewModel);
-        //    }
-
-        //    Log.Info($"Loaded {Chats.Count} mock chats");
-        //}
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

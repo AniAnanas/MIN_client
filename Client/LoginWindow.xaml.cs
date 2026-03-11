@@ -58,8 +58,7 @@ namespace Client
 
             try
             {
-                BtnLogin.IsEnabled = false;
-                BtnRegister.IsEnabled = false;
+                BtnLogin.IsEnabled = BtnRegister.IsEnabled = false;
 
                 (long userId, string token) result;
 
@@ -76,7 +75,7 @@ namespace Client
                     Log.Success($"Login successful, userId: {result.userId}");
                 }
 
-                _db.SaveSetting("CurrentUsername", login);
+                _db.SaveSetting("CurrentUsername", _net.CurrentUser.Username = _net.CurrentUser.Name = login);
                 SaveToken(result.token);
 
                 var main = new MainWindow(result.userId);

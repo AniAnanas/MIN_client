@@ -187,14 +187,15 @@ public class DatabaseService : IDisposable
 
             if (reader.Read())
             {
-                return new UserModel(
-                    reader.Get<long>("Id"),
-                    reader.Get<string>("Username"),
-                    reader.Get<string>("DisplayName") ?? reader.Get<string>("Username")
-                )
+                long id = reader.Get<long>("Id");
+                string username = reader.Get<string>("Username");
+                string name = reader.Get<string>("DisplayName");
+                var result = new UserModel(id, username, (name.IsNullOrSpace() ? username : name))
                 {
                     IsOnline = reader.Get<int>("IsOnline") == 1
                 };
+                Log.Info(result.ToString());
+                return result;
             }
         }
         catch (Exception ex)
@@ -321,7 +322,7 @@ public class DatabaseService : IDisposable
                     reader.Get<long>("Id"),
                     reader.Get<string>("Text"),
                     DateTimeOffset.FromUnixTimeSeconds(reader.Get<long>("Timestamp")).LocalDateTime,
-                    new UserModel(senderId, senderId.ToString())
+                    GetUserById(senderId) ?? new UserModel(senderId, "Unknown", "Unknown")
                 ));
             }
 
@@ -341,7 +342,8 @@ public class DatabaseService : IDisposable
         try
         {
             // Помечаем все входящие сообщения в чате как прочитанные
-            var query = $"UPDATE 'Messages' SET IsRead = 1 WHERE ChatId = {chatId} AND IsOutgoing = 0 AND IsRead = 0";
+            var query = $"UPDATE 'Messages' SET IsRead = 1 WHERE ChatId = {chatId} AND IsOutgoing = 0 AND IsRead = 0"; // `AND IsOutgoing = 0 ` - can be deleted to support unread
+                                                                                                                       // state of "sended planned messages" like in tg
             _connection.Query(query);
 
             // Сбрасываем счётчик непрочитанных

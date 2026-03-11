@@ -2,6 +2,7 @@
 using Client.Models;
 using Client.Services;
 using Client.Shared.Interfaces;
+using System;
 using System.ComponentModel;
 using System.Windows;
 
@@ -20,13 +21,18 @@ namespace Client.ViewModels
             get => _currentChatViewModel;
             private set
             {
-                if (_currentChatViewModel != value)
-                {
-                    _currentChatViewModel?.Dispose();
-                    _currentChatViewModel = value;
-                    OnPropertyChanged(nameof(CurrentChatViewModel));
-                    OnPropertyChanged(nameof(IsChatSelected));
-                }
+                if (_currentChatViewModel == value) return;
+
+                if (_currentChatViewModel != null)
+                    _currentChatViewModel.OutgoingMessageSended -= OnMessageSended;
+                _currentChatViewModel?.Dispose();
+
+                _currentChatViewModel = value;
+                if (_currentChatViewModel != null)
+                    _currentChatViewModel.OutgoingMessageSended += OnMessageSended;
+
+                OnPropertyChanged(nameof(CurrentChatViewModel));
+                OnPropertyChanged(nameof(IsChatSelected));
             }
         }
         public bool IsChatSelected => CurrentChatViewModel != null;
@@ -43,9 +49,9 @@ namespace Client.ViewModels
 
             // Initialize services
             _networkService = App.Current.Resources["Net"] as INetworkService
-                ?? throw new System.NullReferenceException("NetworkService not found");
+                ?? throw new NullReferenceException("NetworkService not found");
             _databaseService = App.Current.Resources["Database"] as DatabaseService
-                ?? throw new System.NullReferenceException("DatabaseService not found");
+                ?? throw new NullReferenceException("DatabaseService not found");
 
             // Initialize ViewModels
             WindowViewModel = new WindowViewModel();
@@ -89,6 +95,20 @@ namespace Client.ViewModels
 
             Log.Info("Subscribed to network events");
         }
+
+        private void OnMessageSended(MessageModel message, long chatId)
+        {
+            try
+            {
+                _databaseService.SaveMessageFromModel(message, chatId, isOutgoing: true);
+                TabListViewModel.HandleNewMessage(message, chatId);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"OnMessageSended error: {ex.Message}");
+            }
+        }
+
 
         private void OnMessageReceived(MessageModel message)
         {
@@ -142,7 +162,6 @@ namespace Client.ViewModels
 
                     if (chatModel != null)
                     {
-                        // Создаем новый ChatViewModel
                         CurrentChatViewModel = new ChatViewModel(chatModel);
                     }
                 }

@@ -32,6 +32,7 @@ public interface INetworkService
     Task Disconnect(bool sendPacket = false);
 
     long CurrentUserId { get; }
+    UserModel CurrentUser { get; }
 
     event Action<MessageModel> MessageReceived;
     event Action<UserModel[]> UsersReceived;
