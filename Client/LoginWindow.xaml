@@ -36,7 +36,7 @@
 
             <!-- ошибка -->
             <TextBlock x:Name="TbError"
-                   Grid.Row="2"
+                   Grid.Row="3"
                    Foreground="Red"
                    TextWrapping="Wrap"
                    Visibility="Collapsed"/>
